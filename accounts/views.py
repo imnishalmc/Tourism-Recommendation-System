@@ -10,6 +10,7 @@ from .serializers import (
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsAdminRole, IsRegularUser
 
 
 class RegisterView(APIView):
@@ -88,3 +89,10 @@ class ChangePasswordView(APIView):
         user.set_password(serializer.validated_data["new_password"])
         user.save()
         return Response({"message": "Password changed successfully."})
+
+
+class AdminOnlyView(APIView):
+    permission_classes = [IsAdminRole]
+
+    def get(self, request):
+        return Response({"message": "only the user can access this "})

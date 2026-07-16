@@ -1,7 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegisterSerializer, UserSerializer, LoginSerializer
+from .serializers import (
+    RegisterSerializer,
+    UserSerializer,
+    LoginSerializer,
+    ChangePasswordSerializer,
+)
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -48,7 +53,7 @@ class LoginView(APIView):
             {
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
-                # "user": UserSerializer(user).data,
+                "user": UserSerializer(user).data,
             }
         )
 
@@ -58,3 +63,28 @@ class profileView(APIView):
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+    def patch(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        if not user.check_password(serializer.validated_data["old_password"]):
+            return Response(
+                {"error": "Old password is incorrect."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(serializer.validated_data["new_password"])
+        user.save()
+        return Response({"message": "Password changed successfully."})

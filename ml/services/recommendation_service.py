@@ -20,6 +20,7 @@ from ml.recommendation.recommendation_engine import RecommendationEngine
 class RecommendationService:
 
     def __init__(self):
+
         self.df = None
         self.similarity_matrix = None
         self.recommendation_engine = None
@@ -27,6 +28,8 @@ class RecommendationService:
         self.load_model()
 
     def load_model(self):
+
+        print("Loading Recommendation Model...")
 
         df = pd.read_csv(DATASET_PATH)
 
@@ -65,6 +68,7 @@ class RecommendationService:
         )
 
         self.df = feature_df
+
         self.similarity_matrix = similarity_matrix
 
         self.recommendation_engine = RecommendationEngine(
@@ -72,5 +76,8 @@ class RecommendationService:
             similarity_matrix,
         )
 
+        print("Recommendation Model Loaded Successfully.")
+
     def get_recommendations(self, destination):
+
         return self.recommendation_engine.recommend(destination)

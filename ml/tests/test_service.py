@@ -2,12 +2,20 @@ from ml.services.recommendation_service import RecommendationService
 
 service = RecommendationService()
 
-destination = input("Enter destination: ")
+destination = input("Destination: ")
 
-results = service.get_recommendations(destination)
+recommendations = service.get_recommendations(destination)
 
-if results is None:
+print()
+
+if recommendations is None:
     print("Destination not found.")
+
 else:
-    for place in results:
-        print(place)
+
+    for recommendation in recommendations:
+
+        print(
+            recommendation["destination"],
+            recommendation["match_score"],
+        )

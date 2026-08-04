@@ -1,6 +1,6 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from config import MAX_FEATURES, NGRAM_RANGE, STOP_WORDS
+from ml.config import MAX_FEATURES, NGRAM_RANGE, STOP_WORDS
 
 
 class TextFeatureExtractor:

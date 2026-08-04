@@ -1,4 +1,4 @@
-from services.recommendation_service import RecommendationService
+from ml.services.recommendation_service import RecommendationService
 
 service = RecommendationService()
 

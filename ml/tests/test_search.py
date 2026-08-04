@@ -1,12 +1,12 @@
 import pandas as pd
 
-from config import DATASET_PATH
+from ml.config import DATASET_PATH
 
-from preprocessing.cleaning import DataPreprocessor
-from preprocessing.text_preprocessing import TextPreprocessor
-from preprocessing.feature_engineering import FeatureEngineer
+from ml.preprocessing.cleaning import DataPreprocessor
+from ml.preprocessing.text_preprocessing import TextPreprocessor
+from ml.preprocessing.feature_engineering import FeatureEngineer
 
-from search.search_engine import SearchEngine
+from ml.search.search_engine import SearchEngine
 
 
 df = pd.read_csv(DATASET_PATH)

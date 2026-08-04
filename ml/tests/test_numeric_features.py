@@ -1,10 +1,10 @@
 import pandas as pd
 
-from config import DATASET_PATH
-from preprocessing.cleaning import DataPreprocessor
-from preprocessing.text_preprocessing import TextPreprocessor
-from preprocessing.feature_engineering import FeatureEngineer
-from features.numeric_features import NumericFeatureExtractor
+from ml.config import DATASET_PATH
+from ml.preprocessing.cleaning import DataPreprocessor
+from ml.preprocessing.text_preprocessing import TextPreprocessor
+from ml.preprocessing.feature_engineering import FeatureEngineer
+from ml.features.numeric_features import NumericFeatureExtractor
 
 
 df = pd.read_csv(DATASET_PATH)

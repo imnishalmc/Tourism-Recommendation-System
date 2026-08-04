@@ -1,4 +1,4 @@
-from utils.file_loader import FileLoader
+from ml.utils.file_loader import FileLoader
 
 df = FileLoader.load_dataset()
 

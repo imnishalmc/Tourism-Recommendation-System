@@ -9,7 +9,7 @@ from destinations.lookups import (
     BUDGET_DURATION_LOOKUP,
 )
 
-CSV_PATH = "destinations/data/Sajilo_Yatraa_dataset.csv"
+CSV_PATH = "data/Sajilo_Yatraa_dataset.csv"
 
 
 def clean_coordinate(value):

@@ -1,5 +1,9 @@
-DATASET_PATH = "dataset/final_dataset.csv"
-CLEANED_DATASET_PATH = "dataset/cleaned_dataset.csv"
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+DATASET_PATH = PROJECT_ROOT / "data" / "Sajilo_Yatraa_dataset.csv"
+CLEANED_DATASET_PATH = PROJECT_ROOT / "data" / "cleaned_dataset.csv"
 
 TOP_K = 6
 MIN_SIMILARITY = 0.10
@@ -16,22 +20,22 @@ STOP_WORDS = "english"
 NUMERIC_COLUMNS = [
     "ratings",
     "popularity",
-    "review_count"
+    "attraction_total_reviews",
 ]
 
 TEXT_COLUMNS = [
     "description",
     "tags",
-    "activities"
+    "activities",
 ]
 
 CATEGORY_COLUMN = "main_category"
 
-DIFFICULTY_COLUMN = "difficulty"
+DIFFICULTY_COLUMN = "difficulty_level"
 
 SEARCH_COLUMNS = [
-    "destination_name",
+    "destination",
     "description",
     "tags",
-    "activities"
+    "activities",
 ]

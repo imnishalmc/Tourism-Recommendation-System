@@ -1,4 +1,4 @@
-from similarity.match_score import MatchScoreCalculator
+from ml.similarity.match_score import MatchScoreCalculator
 
 
 class RecommendationEngine:

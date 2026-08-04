@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from config import DATASET_PATH
+from ml.config import DATASET_PATH
 
 
 class FileLoader:

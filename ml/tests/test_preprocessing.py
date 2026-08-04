@@ -1,7 +1,7 @@
 import pandas as pd
 
-from config import DATASET_PATH, CLEANED_DATASET_PATH
-from preprocessing.cleaning import DataPreprocessor
+from ml.config import DATASET_PATH, CLEANED_DATASET_PATH
+from ml.preprocessing.cleaning import DataPreprocessor
 
 
 df = pd.read_csv(DATASET_PATH)

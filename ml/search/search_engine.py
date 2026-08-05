@@ -5,7 +5,7 @@ class SearchEngine:
 
     def search(self, query):
 
-        query = query.lower().strip()
+        query = str(query).lower().strip()
 
         results = self.df[
             (
@@ -19,28 +19,49 @@ class SearchEngine:
                 .str.lower()
                 .str.contains(query, na=False)
             )
-        ]
+        ].copy()
 
-        return results.reset_index(drop=True)
+        if results.empty:
+            return results
+
+        results["search_score"] = 0
+
+        # Exact destination match
+        results.loc[
+            results["destination"]
+            .str.lower()
+            .eq(query),
+            "search_score"
+        ] += 10
+
+        # Partial destination match
+        results.loc[
+            results["destination"]
+            .str.lower()
+            .str.contains(query, na=False),
+            "search_score"
+        ] += 5
+
+        # Keyword match
+        results.loc[
+            results["combined_features"]
+            .str.lower()
+            .str.contains(query, na=False),
+            "search_score"
+        ] += 2
+
+        return results.sort_values(
+            by="search_score",
+            ascending=False
+        ).reset_index(drop=True)
 
     def search_by_destination(self, destination_name):
 
-        results = self.df[
+        return self.df[
             self.df["destination"]
             .str.lower()
-            == destination_name.lower()
-        ]
-
-        return results.reset_index(drop=True)
+            .eq(destination_name.lower())
+        ].reset_index(drop=True)
 
     def search_by_keyword(self, keyword):
-
-        keyword = keyword.lower().strip()
-
-        results = self.df[
-            self.df["combined_features"]
-            .str.lower()
-            .str.contains(keyword, na=False)
-        ]
-
-        return results.reset_index(drop=True)
+        return self.search(keyword)

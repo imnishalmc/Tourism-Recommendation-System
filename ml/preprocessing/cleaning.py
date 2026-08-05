@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 
 
@@ -33,7 +31,7 @@ class DataPreprocessor:
         for column in numeric_columns:
             self.df[column] = pd.to_numeric(
                 self.df[column],
-                errors="coerce"
+                errors="coerce",
             )
 
             self.df[column] = self.df[column].fillna(
@@ -56,13 +54,9 @@ class DataPreprocessor:
     def preprocess(self):
         (
             self.remove_duplicates()
-                .clean_text_columns()
-                .clean_numeric_columns()
-                .clean_categories()
+            .clean_text_columns()
+            .clean_numeric_columns()
+            .clean_categories()
         )
 
         return self.df
-
-    def save_dataset(self, output_path):
-        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-        self.df.to_csv(output_path, index=False)

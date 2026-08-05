@@ -1,6 +1,10 @@
 class SearchFilter:
 
-    def filter_by_category(self, dataframe, category):
+    def filter_by_category(
+        self,
+        dataframe,
+        category,
+    ):
 
         if not category:
             return dataframe
@@ -10,7 +14,7 @@ class SearchFilter:
         filtered_df = dataframe[
             dataframe["main_category"]
             .str.lower()
-            .str.contains(category, na=False)
+            .eq(category)
         ]
 
         return filtered_df.reset_index(drop=True)

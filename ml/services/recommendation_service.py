@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ml.config import DATASET_PATH
+from destinations.models import Destination
 
 from ml.preprocessing.cleaning import DataPreprocessor
 from ml.preprocessing.text_preprocessing import TextPreprocessor
@@ -21,7 +21,7 @@ class RecommendationService:
 
     def __init__(self):
 
-        self.df = None
+        self.df = pd.DataFrame()
         self.similarity_matrix = None
         self.recommendation_engine = None
 
@@ -31,31 +31,75 @@ class RecommendationService:
 
         print("Loading Recommendation Model...")
 
-        df = pd.read_csv(DATASET_PATH)
+        destinations = Destination.objects.all()
 
+        if not destinations.exists():
+            print("No destinations found.")
+
+            self.df = pd.DataFrame()
+            self.similarity_matrix = None
+            self.recommendation_engine = None
+
+            return
+
+        data = []
+
+        for destination in destinations:
+
+            data.append(
+                {
+                    "destination": destination.name,
+                    "district": destination.district,
+                    "province": destination.province,
+                    "best_season": destination.best_season,
+                    "main_category": destination.main_category,
+                    "description": destination.description,
+                    "tags": ", ".join(destination.tags)
+                    if destination.tags
+                    else "",
+                    "activities": destination.activities,
+                    "accessibility": destination.accessibility,
+                    "transportation": destination.transportation,
+                    "difficulty_level": destination.difficulty_level,
+                    "ratings": destination.ratings,
+                    "popularity": destination.popularity,
+                    "attraction_total_reviews": destination.attraction_total_reviews,
+                }
+            )
+
+        df = pd.DataFrame(data)
+
+        # Data Cleaning
         clean_df = DataPreprocessor(df).preprocess()
 
-        processor = TextPreprocessor(clean_df)
+        # Text Preprocessing
+        processed_df = TextPreprocessor(
+            clean_df
+        ).preprocess()
 
-        columns = [
-            "description",
-            "tags",
-            "activities",
-            "transportation",
-        ]
+        # Feature Engineering
+        feature_df = FeatureEngineer(
+            processed_df
+        ).preprocess()
 
-        processed_df = processor.preprocess_columns(columns)
+        # Feature Extraction
+        text_matrix = TextFeatureExtractor().extract_features(
+            feature_df
+        )
 
-        feature_df = FeatureEngineer(processed_df).preprocess()
+        category_matrix = CategoryFeatureExtractor().extract_features(
+            feature_df
+        )
 
-        text_matrix = TextFeatureExtractor().extract_features(feature_df)
+        numeric_matrix = NumericFeatureExtractor().extract_features(
+            feature_df
+        )
 
-        category_matrix = CategoryFeatureExtractor().extract_features(feature_df)
+        difficulty_matrix = DifficultyFeatureExtractor().extract_features(
+            feature_df
+        )
 
-        numeric_matrix = NumericFeatureExtractor().extract_features(feature_df)
-
-        difficulty_matrix = DifficultyFeatureExtractor().extract_features(feature_df)
-
+        # Combine Features
         combined_matrix = FeatureCombiner().combine(
             text_matrix,
             category_matrix,
@@ -63,12 +107,12 @@ class RecommendationService:
             difficulty_matrix,
         )
 
+        # Cosine Similarity
         similarity_matrix = CosineSimilarityCalculator().calculate(
             combined_matrix
         )
 
         self.df = feature_df
-
         self.similarity_matrix = similarity_matrix
 
         self.recommendation_engine = RecommendationEngine(
@@ -76,8 +120,21 @@ class RecommendationService:
             similarity_matrix,
         )
 
-        print("Recommendation Model Loaded Successfully.")
+        print(
+            f"Recommendation Model Loaded Successfully "
+            f"({len(feature_df)} destinations)."
+        )
 
-    def get_recommendations(self, destination):
+    def get_recommendations(
+        self,
+        destination,
+        category=None,
+    ):
 
-        return self.recommendation_engine.recommend(destination)
+        if self.recommendation_engine is None:
+            return None
+
+        return self.recommendation_engine.recommend(
+            query=destination,
+            category=category,
+        )

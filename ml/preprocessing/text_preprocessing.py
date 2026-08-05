@@ -12,6 +12,10 @@ class TextPreprocessor:
         self.lemmatizer = WordNetLemmatizer()
 
     def clean_text(self, text):
+
+        if not text:
+            return ""
+
         text = str(text).lower()
         text = re.sub(r"[^a-zA-Z\s]", " ", text)
         text = re.sub(r"\s+", " ", text).strip()
@@ -20,15 +24,18 @@ class TextPreprocessor:
 
         for word in text.split():
             if word not in self.stop_words:
-                word = self.lemmatizer.lemmatize(word)
-                words.append(word)
+                words.append(
+                    self.lemmatizer.lemmatize(word)
+                )
 
         return " ".join(words)
 
     def preprocess_columns(self, columns):
         for column in columns:
             if column in self.df.columns:
-                self.df[column] = self.df[column].apply(self.clean_text)
+                self.df[column] = self.df[column].apply(
+                    self.clean_text
+                )
 
         return self.df
 
@@ -37,7 +44,7 @@ class TextPreprocessor:
             "description",
             "tags",
             "activities",
-            "transportation"
+            "transportation",
         ]
 
         return self.preprocess_columns(columns)

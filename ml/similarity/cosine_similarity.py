@@ -5,6 +5,7 @@ class CosineSimilarityCalculator:
 
     def calculate(self, feature_matrix):
 
-        similarity_matrix = cosine_similarity(feature_matrix)
+        if feature_matrix is None:
+            raise ValueError("Feature matrix cannot be None.")
 
-        return similarity_matrix
+        return cosine_similarity(feature_matrix)

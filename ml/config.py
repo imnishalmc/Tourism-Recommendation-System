@@ -1,11 +1,5 @@
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-
-DATASET_PATH = PROJECT_ROOT / "data" / "Sajilo_Yatraa_dataset.csv"
-CLEANED_DATASET_PATH = PROJECT_ROOT / "data" / "cleaned_dataset.csv"
-
 TOP_K = 6
+
 MIN_SIMILARITY = 0.10
 
 TEXT_WEIGHT = 0.50
@@ -27,6 +21,7 @@ TEXT_COLUMNS = [
     "description",
     "tags",
     "activities",
+    "transportation",
 ]
 
 CATEGORY_COLUMN = "main_category"
@@ -38,4 +33,7 @@ SEARCH_COLUMNS = [
     "description",
     "tags",
     "activities",
+    "district",
+    "province",
+    "main_category",
 ]

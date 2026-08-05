@@ -11,10 +11,11 @@ class FeatureEngineer:
             "activities",
             "main_category",
             "district",
+            "province",
             "best_season",
             "transportation",
             "accessibility",
-            "difficulty_level"
+            "difficulty_level",
         ]
 
         self.df["combined_features"] = (

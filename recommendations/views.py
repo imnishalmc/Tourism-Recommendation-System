@@ -8,21 +8,25 @@ from .services import get_recommendations
 class RecommendationAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        destination = request.GET.get("destination")
+    def post(self, request):
+        destination = request.data.get("destination")
+        category = request.data.get("category")
 
         if not destination:
             return Response(
                 {"error": "destination parameter is required"},
-                status=400
+                status=400,
             )
 
-        recommendations = get_recommendations(destination)
+        recommendations = get_recommendations(
+            destination,
+            category,
+        )
 
         if recommendations is None:
             return Response(
                 {"error": "Destination not found"},
-                status=404
+                status=404,
             )
 
         return Response(recommendations)

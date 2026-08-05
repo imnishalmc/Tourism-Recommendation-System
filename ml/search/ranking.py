@@ -4,13 +4,15 @@ class SearchRanking:
 
         ranked_df = dataframe.sort_values(
             by=[
+                "search_score",
                 "ratings",
-                "popularity"
+                "popularity",
             ],
             ascending=[
                 False,
-                False
-            ]
+                False,
+                False,
+            ],
         )
 
         return ranked_df.reset_index(drop=True)

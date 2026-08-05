@@ -1,16 +1,14 @@
 import json
-import pandas as pd
 
 from google import genai
 from django.conf import settings
 
-from ml.config import DATASET_PATH
+from destinations.models import Destination
 
 
 class ItineraryService:
 
     def __init__(self):
-        self.df = pd.read_csv(DATASET_PATH)
         self.client = genai.Client(
             api_key=settings.GEMINI_API_KEY
         )
@@ -25,21 +23,21 @@ class ItineraryService:
         interests,
     ):
 
-        destination = destination.strip().lower()
+        destination = destination.strip()
 
-        matches = self.df[
-            self.df["destination"]
-            .astype(str)
-            .str.lower()
-            .str.contains(destination, na=False)
-        ]
+        place = Destination.objects.filter(
+            name__iexact=destination
+        ).first()
 
-        if matches.empty:
+        if place is None:
+            place = Destination.objects.filter(
+                name__icontains=destination
+            ).first()
+
+        if place is None:
             return {
                 "error": "Destination not found."
             }
-
-        place = matches.iloc[0]
 
         prompt = f"""
 You are an expert Nepal travel planner.
@@ -51,58 +49,61 @@ Use the destination information below as the PRIMARY source.
 Destination Information
 
 Destination:
-{place["destination"]}
+{place.name}
 
 District:
-{place["district"]}
+{place.district}
 
 Province:
-{place["province"]}
+{place.province}
 
 Best Season:
-{place["best_season"]}
+{place.best_season}
 
 Category:
-{place["main_category"]}
+{place.main_category}
 
 Tags:
-{place["tags"]}
+{", ".join(place.tags)}
 
 Activities:
-{place["activities"]}
+{place.activities}
 
 Difficulty:
-{place["difficulty_level"]}
+{place.difficulty_level}
 
 Accessibility:
-{place["accessibility"]}
+{place.accessibility}
 
 Transportation:
-{place["transportation"]}
+{place.transportation}
 
 Description:
-{place["description"]}
-
-Popularity:
-{place["popularity"]}
+{place.description}
 
 Ratings:
-{place["ratings"]}
+{place.ratings}
+
+Popularity:
+{place.popularity}
 
 Crowd Level:
-{place["crowd_level"]}
+{place.crowd_level}
+
+Budget Level:
+{place.budget_level}
+
+Recommended Visit Duration:
+{place.visit_duration_days} days
 
 Latitude:
-{place["latitude"]}
+{place.latitude}
 
 Longitude:
-{place["longitude"]}
-
-Sample Reviews:
-{place["attraction_sample_reviews"]}
+{place.longitude}
 
 Total Reviews:
-{place["attraction_total_reviews"]}
+{place.attraction_total_reviews}
 
 User Preferences
 
@@ -123,43 +124,50 @@ Interests:
 
 Instructions
 
-- Start every trip from Kathmandu.
-- Follow realistic road conditions and travel time.
-- Use transportation mentioned in the dataset.
-- Never include impossible activities in one day.
+- Start the trip from Kathmandu.
+- Follow realistic travel routes.
+- Use the transportation mentioned above.
+- Never include impossible activities.
 - Trekking destinations should gradually increase altitude.
 - Nature destinations should include viewpoints.
-- Cultural destinations should include local food and markets.
+- Cultural destinations should include temples, local markets and local food.
 - Wildlife destinations should include safari or nature walks.
 - Suggest accommodation whenever an overnight stay is needed.
 - Suggest local meals.
-- Estimate reasonable travel costs.
+- Estimate realistic travel costs.
 - Use your own Nepal travel knowledge ONLY to fill missing details.
-- Return ONLY VALID JSON.
+- Generate exactly {days} itinerary days.
+- Keep each title between 2 and 5 words.
+- Keep each badge to one word.
+- Keep each description between 20 and 30 words.
+- Use simple English.
+- Every day should have a unique title.
+- Do not repeat activities.
+- Return ONLY valid JSON.
+- Do NOT return Markdown.
+- Do NOT return explanations.
 
 Return exactly in this format:
 
 {{
-    "destination": "{place["destination"]}",
+    "destination": "{place.name}",
     "plan_type": "Balanced Plan",
     "days": {days},
     "travelers": {travelers},
-    "category": "{place["main_category"]}",
-    "estimated_total_cost": 0,
-    "estimated_cost_per_person": 0,
+    "category": "{place.main_category}",
+    "estimated_total_cost": 85000,
+    "estimated_cost_per_person": 42500,
     "itinerary": [
         {{
             "day": 1,
-            "title": "Journey Begins",
+            "title": "Drive to {place.name}",
             "from": "Kathmandu",
-            "to": "{place["destination"]}",
+            "to": "{place.name}",
             "badge": "Travel",
-            "description": "..."
+            "description": "Travel from Kathmandu to {place.name}, check into your hotel, explore nearby attractions and enjoy authentic local cuisine."
         }}
     ]
 }}
-
-Do not return markdown.
 
 Return JSON only.
 """
@@ -184,12 +192,14 @@ Return JSON only.
             return json.loads(text)
 
         except json.JSONDecodeError:
+
             return {
                 "error": "Gemini returned invalid JSON.",
-                "raw_response": text
+                "raw_response": text,
             }
 
         except Exception as e:
+
             return {
                 "error": str(e)
             }

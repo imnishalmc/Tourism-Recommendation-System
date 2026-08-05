@@ -9,4 +9,6 @@ urlpatterns = [
     path("v1/", include("destinations.urls")),
 
     path("v1/recommend/", include("recommendations.urls")),
+    path("v1/itinerary/",include("itinerary.urls"),
+),
 ]

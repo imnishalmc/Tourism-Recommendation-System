@@ -1,28 +1,46 @@
 import pandas as pd
 
-from ml.config import DATASET_PATH
-
-from ml.preprocessing.cleaning import DataPreprocessor
-from ml.preprocessing.text_preprocessing import TextPreprocessor
-from ml.preprocessing.feature_engineering import FeatureEngineer
-
-from ml.features.text_features import TextFeatureExtractor
+from ml.features.text_features import (
+    TextFeatureExtractor,
+)
 
 
-df = pd.read_csv(DATASET_PATH)
+def test_extract_text_features():
 
-clean_df = DataPreprocessor(df).preprocess()
+    df = pd.DataFrame(
+        {
+            "combined_features": [
+                "beautiful lake boating",
+                "mountain trekking hiking",
+            ]
+        }
+    )
 
-processed_df = TextPreprocessor(clean_df).preprocess()
+    extractor = TextFeatureExtractor()
 
-feature_df = FeatureEngineer(processed_df).preprocess()
+    matrix = extractor.extract_features(
+        df
+    )
 
-extractor = TextFeatureExtractor()
+    assert matrix.shape[0] == 2
+    assert matrix.shape[1] > 0
 
-tfidf_matrix = extractor.extract_features(feature_df)
 
-print("TF-IDF Matrix Shape:")
-print(tfidf_matrix.shape)
+def test_feature_names():
 
-print("\nFirst 20 Features:")
-print(extractor.get_feature_names()[:20])
+    df = pd.DataFrame(
+        {
+            "combined_features": [
+                "beautiful lake",
+                "mountain trekking",
+            ]
+        }
+    )
+
+    extractor = TextFeatureExtractor()
+
+    extractor.extract_features(df)
+
+    names = extractor.get_feature_names()
+
+    assert len(names) > 0

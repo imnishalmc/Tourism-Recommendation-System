@@ -1,26 +1,45 @@
 import pandas as pd
 
-from ml.config import DATASET_PATH
-from ml.preprocessing.cleaning import DataPreprocessor
-from ml.preprocessing.text_preprocessing import TextPreprocessor
-from ml.preprocessing.feature_engineering import FeatureEngineer
-from ml.features.category_features import CategoryFeatureExtractor
+from ml.features.category_features import (
+    CategoryFeatureExtractor,
+)
 
 
-df = pd.read_csv(DATASET_PATH)
+def test_extract_category_features():
 
-clean_df = DataPreprocessor(df).preprocess()
+    df = pd.DataFrame(
+        {
+            "main_category": [
+                "Nature",
+                "Adventure",
+                "Nature",
+            ]
+        }
+    )
 
-processed_df = TextPreprocessor(clean_df).preprocess()
+    extractor = CategoryFeatureExtractor()
 
-feature_df = FeatureEngineer(processed_df).preprocess()
+    matrix = extractor.extract_features(df)
 
-extractor = CategoryFeatureExtractor()
+    assert matrix.shape[0] == 3
+    assert matrix.shape[1] == 2
 
-category_matrix = extractor.extract_features(feature_df)
 
-print("Category Matrix Shape:")
-print(category_matrix.shape)
+def test_category_feature_names():
 
-print("\nCategories:")
-print(extractor.get_feature_names())
+    df = pd.DataFrame(
+        {
+            "main_category": [
+                "Nature",
+                "Adventure",
+            ]
+        }
+    )
+
+    extractor = CategoryFeatureExtractor()
+
+    extractor.extract_features(df)
+
+    names = extractor.get_feature_names()
+
+    assert len(names) == 2

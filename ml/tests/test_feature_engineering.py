@@ -1,17 +1,36 @@
 import pandas as pd
 
-from ml.config import DATASET_PATH
-from ml.preprocessing.cleaning import DataPreprocessor
-from ml.preprocessing.text_preprocessing import TextPreprocessor
 from ml.preprocessing.feature_engineering import FeatureEngineer
 
 
-df = pd.read_csv(DATASET_PATH)
+def test_combined_features():
 
-clean_df = DataPreprocessor(df).preprocess()
+    df = pd.DataFrame(
+        {
+            "description": ["Beautiful Lake"],
+            "tags": ["Nature"],
+            "activities": ["Boating"],
+            "main_category": ["Nature"],
+            "district": ["Kaski"],
+            "province": ["Gandaki"],
+            "best_season": ["Autumn"],
+            "transportation": ["Bus"],
+            "accessibility": ["Easy"],
+            "difficulty_level": ["Easy"],
+        }
+    )
 
-processed_df = TextPreprocessor(clean_df).preprocess()
+    engineered = FeatureEngineer(
+        df
+    ).preprocess()
 
-final_df = FeatureEngineer(processed_df).preprocess()
+    assert "combined_features" in engineered.columns
 
-print(final_df[["destination", "combined_features"]].head())
+    text = engineered.loc[
+        0,
+        "combined_features",
+    ]
+
+    assert "Beautiful Lake" in text
+    assert "Nature" in text
+    assert "Boating" in text

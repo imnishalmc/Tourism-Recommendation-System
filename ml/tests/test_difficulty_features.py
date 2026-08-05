@@ -1,29 +1,41 @@
 import pandas as pd
 
-from ml.preprocessing.cleaning import DataPreprocessor
-from ml.config import DATASET_PATH
-from ml.preprocessing.text_preprocessing import TextPreprocessor
-from ml.features.difficulty_features import DifficultyFeatureExtractor
-from ml.preprocessing.feature_engineering import FeatureEngineer
+from ml.features.difficulty_features import (
+    DifficultyFeatureExtractor,
+)
 
 
-df = pd.read_csv(DATASET_PATH)
+def test_extract_difficulty_features():
 
-clean_df = DataPreprocessor(df).preprocess()
+    df = pd.DataFrame(
+        {
+            "difficulty_level": [
+                "Easy",
+                "Moderate",
+                "Hard",
+            ]
+        }
+    )
 
-processed_df = TextPreprocessor(clean_df).preprocess()
+    extractor = DifficultyFeatureExtractor()
 
-feature_df = FeatureEngineer(processed_df).preprocess()
+    matrix = extractor.extract_features(df)
 
-extractor = DifficultyFeatureExtractor()
+    assert matrix.shape == (3, 1)
 
-difficulty_matrix = extractor.extract_features(feature_df)
 
-print("Difficulty Matrix Shape:")
-print(difficulty_matrix.shape)
+def test_unknown_difficulty():
 
-print("\nFeature Names:")
-print(extractor.get_feature_names())
+    df = pd.DataFrame(
+        {
+            "difficulty_level": [
+                "Unknown"
+            ]
+        }
+    )
 
-print("\nFirst 10 Rows:")
-print(difficulty_matrix[:10])
+    extractor = DifficultyFeatureExtractor()
+
+    matrix = extractor.extract_features(df)
+
+    assert matrix[0][0] == 0.5

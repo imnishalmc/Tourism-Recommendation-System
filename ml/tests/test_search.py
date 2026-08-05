@@ -1,54 +1,83 @@
 import pandas as pd
 
-from ml.config import DATASET_PATH
-
-from ml.preprocessing.cleaning import DataPreprocessor
-from ml.preprocessing.text_preprocessing import TextPreprocessor
-from ml.preprocessing.feature_engineering import FeatureEngineer
-
 from ml.search.search_engine import SearchEngine
 
 
-df = pd.read_csv(DATASET_PATH)
+def get_dataframe():
 
-clean_df = DataPreprocessor(df).preprocess()
+    return pd.DataFrame(
+        {
+            "destination": [
+                "Pokhara",
+                "Chitwan",
+                "Annapurna Base Camp",
+            ],
+            "combined_features": [
+                "lake boating nature gandaki",
+                "jungle safari wildlife",
+                "trekking mountain hiking",
+            ],
+        }
+    )
 
-processor = TextPreprocessor(clean_df)
 
-columns = [
-    "description",
-    "tags",
-    "activities",
-    "main_category",
-    "district",
-    "best_season",
-    "transportation",
-    "accessibility",
-    "difficulty_level"
-]
+def test_search_destination():
 
-processed_df = processor.preprocess_columns(columns)
+    engine = SearchEngine(
+        get_dataframe()
+    )
 
-feature_df = FeatureEngineer(processed_df).preprocess()
+    results = engine.search(
+        "Pokhara"
+    )
 
-search_engine = SearchEngine(feature_df)
+    assert len(results) == 1
 
-query = input("Enter search query: ")
+    assert (
+        results.iloc[0]["destination"]
+        == "Pokhara"
+    )
 
-results = search_engine.search(query)
 
-print()
+def test_search_keyword():
 
-if results.empty:
-    print("No destinations found.")
+    engine = SearchEngine(
+        get_dataframe()
+    )
 
-else:
-    print(f"Found {len(results)} destination(s)\n")
+    results = engine.search(
+        "trekking"
+    )
 
-    for _, row in results.iterrows():
-        print("=" * 80)
-        print("Destination :", row["destination"])
-        print("Category    :", row["main_category"])
-        print("District    :", row["district"])
-        print("Rating      :", row["ratings"])
-        print("Popularity  :", row["popularity"])
+    assert len(results) == 1
+
+    assert (
+        results.iloc[0]["destination"]
+        == "Annapurna Base Camp"
+    )
+
+
+def test_search_partial():
+
+    engine = SearchEngine(
+        get_dataframe()
+    )
+
+    results = engine.search(
+        "Pokh"
+    )
+
+    assert len(results) == 1
+
+
+def test_search_not_found():
+
+    engine = SearchEngine(
+        get_dataframe()
+    )
+
+    results = engine.search(
+        "Everest"
+    )
+
+    assert results.empty

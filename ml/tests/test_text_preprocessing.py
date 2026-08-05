@@ -1,20 +1,42 @@
 import pandas as pd
 
-from ml.config import DATASET_PATH
-from ml.preprocessing.cleaning import DataPreprocessor
 from ml.preprocessing.text_preprocessing import TextPreprocessor
 
 
-df = pd.read_csv(DATASET_PATH)
+def test_clean_text():
 
-cleaner = DataPreprocessor(df)
-clean_df = cleaner.preprocess()
+    df = pd.DataFrame(
+        {
+            "description": [
+                "Beautiful Lakes!!!"
+            ]
+        }
+    )
 
-processor = TextPreprocessor(clean_df)
-processed_df = processor.preprocess()
+    processor = TextPreprocessor(df)
 
-print("Before:\n")
-print(clean_df["description"].head())
+    text = processor.clean_text(
+        "Beautiful Lakes!!!"
+    )
 
-print("\nAfter:\n")
-print(processed_df["description"].head())
+    assert "beautiful" in text
+    assert "lake" in text
+
+
+def test_preprocess_columns():
+
+    df = pd.DataFrame(
+        {
+            "description": [
+                "Beautiful Lakes!!!"
+            ]
+        }
+    )
+
+    processor = TextPreprocessor(df)
+
+    processed = processor.preprocess_columns(
+        ["description"]
+    )
+
+    assert processed.loc[0, "description"] != ""

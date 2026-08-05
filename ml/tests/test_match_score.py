@@ -1,26 +1,20 @@
-from ml.similarity.match_score import MatchScoreCalculator
+from ml.similarity.match_score import (
+    MatchScoreCalculator,
+)
 
 
-calculator = MatchScoreCalculator()
+def test_match_score():
 
-scores = [
-     1.00,
-    0.92,
-    0.87,
-    0.75,
-    0.63,
-    0.48,
-    0.31,
-    0.15,
-    0.00
-]
+    calculator = MatchScoreCalculator()
 
-print("Similarity  ->  Match Score")
+    assert calculator.calculate(1.0) == 100.0
+    assert calculator.calculate(0.5) == 50.0
+    assert calculator.calculate(0.0) == 0.0
 
-for score in scores:
-    print(
-        score,
-        " -> ",
-        calculator.calculate(score),
-        "%"
-    )
+
+def test_match_score_bounds():
+
+    calculator = MatchScoreCalculator()
+
+    assert calculator.calculate(2.0) == 100.0
+    assert calculator.calculate(-1.0) == 0.0

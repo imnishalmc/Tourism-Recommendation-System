@@ -1,29 +1,35 @@
 import pandas as pd
 
-from ml.config import DATASET_PATH
-from ml.preprocessing.cleaning import DataPreprocessor
-from ml.preprocessing.text_preprocessing import TextPreprocessor
-from ml.preprocessing.feature_engineering import FeatureEngineer
-from ml.features.numeric_features import NumericFeatureExtractor
+from ml.features.numeric_features import (
+    NumericFeatureExtractor,
+)
 
 
-df = pd.read_csv(DATASET_PATH)
+def test_extract_numeric_features():
 
-clean_df = DataPreprocessor(df).preprocess()
+    df = pd.DataFrame(
+        {
+            "ratings": [4.5, 5.0],
+            "popularity": [100, 200],
+            "attraction_total_reviews": [50, 75],
+        }
+    )
 
-processed_df = TextPreprocessor(clean_df).preprocess()
+    extractor = NumericFeatureExtractor()
 
-feature_df = FeatureEngineer(processed_df).preprocess()
+    matrix = extractor.extract_features(df)
 
-extractor = NumericFeatureExtractor()
+    assert matrix.shape == (2, 3)
 
-numeric_matrix = extractor.extract_features(feature_df)
 
-print("Numeric Matrix Shape:")
-print(numeric_matrix.shape)
+def test_numeric_feature_names():
 
-print("\nFeature Names:")
-print(extractor.get_feature_names())
+    extractor = NumericFeatureExtractor()
 
-print("\nFirst 5 Rows:")
-print(numeric_matrix[:5])
+    names = extractor.get_feature_names()
+
+    assert names == [
+        "ratings",
+        "popularity",
+        "attraction_total_reviews",
+    ]

@@ -6,7 +6,7 @@ import DestinationListPage from "./pages/destination/DestinationListPage";
 import DestinationDetailPage from "./pages/destination/DestinationDetailPage";
 // import RecommendationPage from "@/pages/recommendation/RecommendationPage";
 import LoginPage from "@/pages/auth/LoginPage";
-// import RegisterPage from "@/pages/auth/RegisterPage";
+import RegisterPage from "@/pages/auth/RegisterPage";
 
 // import ProfilePage from "@/pages/profile/ProfilePage";
 
@@ -31,10 +31,10 @@ function App() {
         element={<LoginPage />}
       />
 
-      {/* <Route
+      <Route
         path="/register"
         element={<RegisterPage />}
-      /> */}
+      />
 
       {/* <Route
         path="/profile"

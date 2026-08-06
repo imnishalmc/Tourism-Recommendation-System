@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases (We do NOT push local databases to GitHub)
+*.sqlite3
+
+# Environments (When you create a .env file later, this prevents it from uploading)
+.env
+*.env
+.venv/
+env/
+venv/
+ENV/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+sajiloyatra/

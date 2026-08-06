@@ -80,7 +80,7 @@ export  function DestinationsSection() {
             </h2>
           </div>
 
-          <Link to="/explore">
+          <Link to="destination">
             <Button
               variant="ghost"
               className="rounded-full font-semibold text-primary"

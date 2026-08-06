@@ -19,12 +19,22 @@ export interface Destination {
     | "high"
     | "very_high";
 
-  description: string;
+  budget_level?: "low" | "medium" | "high";
 
+  description: string;
   image_url: string;
 
   ratings: number | null;
   popularity: number | null;
+
+  
+  best_season?: string;
+  activities?: string;
+  accessibility?: string;
+  transportation?: string;
+  visit_duration_days?: number;
+  review_count?: number;
+  tags?: string[];
 }
 
 export interface PaginatedResponse<T> {

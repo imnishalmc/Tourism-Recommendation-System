@@ -14,8 +14,11 @@ class UserSerializer(serializers.ModelSerializer):
             "trip_duration",
             "interests",
             "date_joined",
+              "is_staff",
+            "is_superuser",
         ]
-        read_only_fields = ["id", "role", "date_joined"]
+        read_only_fields = ["id", "role", "date_joined",   "is_staff",
+            "is_superuser",]
 
 
 class RegisterSerializer(serializers.ModelSerializer):

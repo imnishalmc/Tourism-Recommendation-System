@@ -14,7 +14,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/explore" element={<DestinationListPage />} />
+        <Route path="/destination" element={<DestinationListPage />} />
         <Route path="/destination/:id" element={<DestinationDetailPage />} />
         <Route path="/recommendations" element={<RecommendationPage />} />
         <Route path="/itinerary" element={<ItineraryPage />} />

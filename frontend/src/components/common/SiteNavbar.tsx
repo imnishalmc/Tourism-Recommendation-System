@@ -1,20 +1,21 @@
-
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type MouseEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Mountain, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
+// href = section anchor on the homepage; route = real page to navigate to (optional)
 const navLinks = [
-  { label: 'Home', href: '#home' },
-  { label: 'Explore', href: '#destinations' },
-  { label: 'Recommendations', href: '#recommendations' },
-  { label: 'Itinerary', href: '#itinerary' },
+  { label: 'Home', href: '#home', route: '/' },
+  { label: 'Destinations', href: '#destination', route: '/destination' },
+  { label: 'Recommendations', href: '#recommendations', route: '/recommendations' },
+  { label: 'Itinerary', href: '#itinerary', route: '/itinerary' },
   { label: 'About', href: '#about' },
 ]
-
 export function SiteNavbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -22,6 +23,15 @@ export function SiteNavbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  function handleNavClick(e: MouseEvent<HTMLAnchorElement>, link: typeof navLinks[number]) {
+    if (link.route) {
+      e.preventDefault()
+      navigate(link.route)
+      setOpen(false)
+    }
+    // else: let the default anchor behavior handle same-page scroll
+  }
 
   return (
     <header
@@ -33,12 +43,8 @@ export function SiteNavbar() {
       )}
     >
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
-        <a href="#home" className="flex items-center gap-2">
-          <span
-            className={cn(
-              'flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors',
-            )}
-          >
+        <Link to="/" className="flex items-center gap-2">
+          <span className="flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors">
             <Mountain className="size-6" strokeWidth={2.2} />
           </span>
           <span
@@ -49,13 +55,14 @@ export function SiteNavbar() {
           >
             Sajilo Yatra
           </span>
-        </a>
+        </Link>
 
         <ul className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link)}
                 className={cn(
                   'rounded-full px-5 py-2 text-lg font-semibold transition-colors',
                   scrolled
@@ -72,6 +79,7 @@ export function SiteNavbar() {
         <div className="hidden items-center gap-2 md:flex">
           <Button
             variant="ghost"
+            onClick={() => navigate('/login')}
             className={cn(
               'rounded-full text-lg font-semibold',
               scrolled
@@ -81,7 +89,9 @@ export function SiteNavbar() {
           >
             Login
           </Button>
-          <Button className="h-10 rounded-full px-5 text-lg font-bold">Register</Button>
+          <Button className="h-10 rounded-full px-5 text-lg font-bold" onClick={() => navigate('/register')}>
+            Register
+          </Button>
         </div>
 
         <button
@@ -102,21 +112,23 @@ export function SiteNavbar() {
           <ul className="flex flex-col gap-1">
             {navLinks.map((link) => (
               <li key={link.href}>
-                <a
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="block rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-primary"
-                >
-                  {link.label}
-                </a>
-              </li>
+              <a
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link)}
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-primary"
+              >
+                {link.label}
+              </a>
+            </li>
             ))}
           </ul>
           <div className="mt-3 flex flex-col gap-2">
-            <Button variant="outline" className="w-full rounded-full">
+            <Button variant="outline" className="w-full rounded-full" onClick={() => { navigate('/login'); setOpen(false) }}>
               Login
             </Button>
-            <Button className="w-full rounded-full">Register</Button>
+            <Button className="w-full rounded-full" onClick={() => { navigate('/register'); setOpen(false) }}>
+              Register
+            </Button>
           </div>
         </div>
       )}

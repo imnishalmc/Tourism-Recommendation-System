@@ -126,7 +126,8 @@ Instructions
 
 - Start the trip from Kathmandu.
 - Follow realistic travel routes.
-- Use the transportation mentioned above.
+- consider budget as well
+- Use the transportation mentioned above as reference.
 - Never include impossible activities.
 - Trekking destinations should gradually increase altitude.
 - Nature destinations should include viewpoints.
@@ -155,8 +156,6 @@ Return exactly in this format:
     "days": {days},
     "travelers": {travelers},
     "category": "{place.main_category}",
-    "estimated_total_cost": 85000,
-    "estimated_cost_per_person": 42500,
     "itinerary": [
         {{
             "day": 1,

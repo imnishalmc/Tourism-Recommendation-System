@@ -7,7 +7,6 @@ from .constants import (
     CROWD_LEVEL_CHOICES,
     BUDGET_LEVEL_CHOICES,
 )
-from django.db.models import Avg
 
 
 class Destination(models.Model):
@@ -17,15 +16,19 @@ class Destination(models.Model):
     best_season = models.CharField(max_length=100, blank=True)
 
     main_category = models.CharField(max_length=30, choices=MAIN_CATEGORY_CHOICES)
-    tags = models.JSONField(default=list, blank=True)
+    tags = models.JSONField(
+        default=list, blank=True
+    )  # display/search only, not the similarity vector
     activities = models.CharField(max_length=300, blank=True)
     difficulty_level = models.CharField(max_length=15, choices=DIFFICULTY_CHOICES)
     accessibility = models.CharField(max_length=200, blank=True)
     transportation = models.TextField(blank=True)
 
     crowd_level = models.CharField(max_length=10, choices=CROWD_LEVEL_CHOICES)
-    budget_level = models.CharField(max_length=10, choices=BUDGET_LEVEL_CHOICES)
-    visit_duration_days = models.FloatField(default=0.25)
+    budget_level = models.CharField(
+        max_length=10, choices=BUDGET_LEVEL_CHOICES
+    )  # derived, not from raw CSV
+    visit_duration_days = models.FloatField(default=0.25)  # derived, not from raw CSV
 
     latitude = models.FloatField()
     longitude = models.FloatField()

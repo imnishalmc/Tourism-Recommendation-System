@@ -12,5 +12,5 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("profile/", profileView.as_view(), name="profile"),
     path("changepw/", ChangePasswordView.as_view(), name="change-password"),
-    # path("admintest/", AdminOnlyView.as_view(), name="admin test"),
+    path("admintest/", AdminOnlyView.as_view(), name="admin test"),
 ]

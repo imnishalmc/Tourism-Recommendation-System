@@ -3,10 +3,6 @@ from ml.config import (
     TOP_K,
 )
 
-from ml.search.search_engine import SearchEngine
-from ml.search.filters import SearchFilter
-from ml.search.ranking import SearchRanking
-
 from ml.similarity.match_score import MatchScoreCalculator
 
 
@@ -17,51 +13,27 @@ class RecommendationEngine:
         dataframe,
         similarity_matrix,
     ):
-
         self.df = dataframe
         self.similarity_matrix = similarity_matrix
-
-        self.search_engine = SearchEngine(dataframe)
-        self.search_filter = SearchFilter()
-        self.search_ranking = SearchRanking()
-
         self.match_score = MatchScoreCalculator()
 
     def recommend(
         self,
-        query,
+        destination_name,
         category=None,
         top_n=TOP_K,
     ):
 
-        query = str(query).strip()
-
-        results = self.search_engine.search(query)
-
-        if category:
-            results = self.search_filter.filter_by_category(
-                results,
-                category,
-            )
-
-        if results.empty:
-            return None
-
-        results = self.search_ranking.rank(results)
-
-        matched_destination = results.iloc[0]
-
-        destination_name = matched_destination["destination"]
-
         destination_rows = self.df[
             self.df["destination"]
             .str.lower()
-            .eq(destination_name.lower())
+            .eq(str(destination_name).strip().lower())
         ]
 
         if destination_rows.empty:
             return None
 
+        matched_destination = destination_rows.iloc[0]
         destination_index = destination_rows.index[0]
 
         similarity_scores = list(
@@ -86,6 +58,12 @@ class RecommendationEngine:
                 continue
 
             row = self.df.iloc[index]
+
+            if (
+                category
+                and row["main_category"] != category
+            ):
+                continue
 
             recommendations.append(
                 {

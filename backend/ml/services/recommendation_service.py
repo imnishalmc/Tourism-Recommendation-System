@@ -20,7 +20,6 @@ from ml.recommendation.recommendation_engine import RecommendationEngine
 class RecommendationService:
 
     def __init__(self):
-
         self.df = pd.DataFrame()
         self.similarity_matrix = None
         self.recommendation_engine = None
@@ -45,7 +44,6 @@ class RecommendationService:
         data = []
 
         for destination in destinations:
-
             data.append(
                 {
                     "destination": destination.name,
@@ -69,20 +67,12 @@ class RecommendationService:
 
         df = pd.DataFrame(data)
 
-        # Data Cleaning
         clean_df = DataPreprocessor(df).preprocess()
 
-        # Text Preprocessing
-        processed_df = TextPreprocessor(
-            clean_df
-        ).preprocess()
+        processed_df = TextPreprocessor(clean_df).preprocess()
 
-        # Feature Engineering
-        feature_df = FeatureEngineer(
-            processed_df
-        ).preprocess()
+        feature_df = FeatureEngineer(processed_df).preprocess()
 
-        # Feature Extraction
         text_matrix = TextFeatureExtractor().extract_features(
             feature_df
         )
@@ -99,7 +89,6 @@ class RecommendationService:
             feature_df
         )
 
-        # Combine Features
         combined_matrix = FeatureCombiner().combine(
             text_matrix,
             category_matrix,
@@ -107,7 +96,6 @@ class RecommendationService:
             difficulty_matrix,
         )
 
-        # Cosine Similarity
         similarity_matrix = CosineSimilarityCalculator().calculate(
             combined_matrix
         )
@@ -134,7 +122,12 @@ class RecommendationService:
         if self.recommendation_engine is None:
             return None
 
+        if hasattr(destination, "name"):
+            destination_name = destination.name
+        else:
+            destination_name = str(destination)
+
         return self.recommendation_engine.recommend(
-            query=destination,
+            destination_name=destination_name,
             category=category,
         )

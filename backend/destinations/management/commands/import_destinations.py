@@ -1,6 +1,6 @@
 import re
 import pandas as pd
-from destinations.constants import PROVINCE_NAME_MAP
+
 from django.core.management.base import BaseCommand
 from destinations.models import Destination
 from destinations.lookups import (
@@ -9,7 +9,7 @@ from destinations.lookups import (
     BUDGET_DURATION_LOOKUP,
 )
 
-CSV_PATH = "destinations/data/Sajilo_Yatraa_datasett.csv"
+CSV_PATH = "data/Sajilo_Yatraa_dataset.csv"
 
 
 def clean_coordinate(value):

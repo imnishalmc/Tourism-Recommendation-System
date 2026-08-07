@@ -13,6 +13,7 @@ import {
   DIFFICULTY_LEVELS,
   CROWD_LEVELS,
 } from "@/constants/categories";
+import { buildImageUrl } from "@/lib/destinationImages";
 
 const difficultyStyles: Record<string, string> = {
   easy: "bg-soft-green text-secondary",
@@ -36,7 +37,7 @@ function label(
   return list.find((x) => x.value === value)?.label ?? value;
 }
 
-export  function DestinationsSection() {
+export function DestinationsSection() {
   const [destinations, setDestinations] = useState<
     Destination[]
   >([]);
@@ -113,11 +114,12 @@ export  function DestinationsSection() {
                 <div className="relative aspect-[4/3] overflow-hidden">
 
                   <img
-                    src={
-                      d.image_url ||
-                      "/images/placeholder.jpg"
-                    }
+                    src={buildImageUrl(d.image_url)}
                     alt={d.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/images/placeholder.jpg";
+                    }}
                     className="size-full object-cover transition group-hover:scale-105"
                   />
 
@@ -148,7 +150,7 @@ export  function DestinationsSection() {
                       className={cn(
                         "rounded-full px-3 py-1 text-xs",
                         difficultyStyles[
-                          d.difficulty_level
+                        d.difficulty_level
                         ]
                       )}
                     >

@@ -90,7 +90,9 @@ class Command(BaseCommand):
                     name=str(row["destination"]).strip().title(),
                     defaults={
                         "district": row["district"],
-                        "province": PROVINCE_NAME_MAP.get(str(row['province']).strip(), str(row['province'])),,
+                        "province": PROVINCE_NAME_MAP.get(
+                            str(row["province"]).strip(), str(row["province"])
+                        ),
                         "best_season": row["best_season"],
                         "main_category": category_key,
                         "tags": split_tags(row["tags"]),
@@ -108,6 +110,7 @@ class Command(BaseCommand):
                         "description": row["description"],
                         "ratings": row["ratings"],
                         "popularity": row["popularity"],
+                        "image_url": str(row["destination_image_path"]).strip(),
                         "attraction_total_reviews": row["attraction_total_reviews"],
                     },
                 )

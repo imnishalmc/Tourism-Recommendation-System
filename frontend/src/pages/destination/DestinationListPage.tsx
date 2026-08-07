@@ -13,6 +13,7 @@ import {
   CROWD_LEVELS,
   BUDGET_LEVELS,
 } from '@/constants/categories'
+import { buildImageUrl } from '@/lib/destinationImages'
 
 const difficultyStyles: Record<string, string> = {
   easy: 'bg-soft-green text-secondary',
@@ -84,18 +85,18 @@ export function DestinationListPage() {
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 md:px-8">
-        
+
       <div className="m-2">
-         <div className="px-2 text-center">
-               
-                <Link to="/">
-                    <Button variant="outline" className="mt-6 rounded-full shimmer-color-gray-400">
-                        <ArrowLeft className="size-4" />
-                        Back to Home
-                    </Button>
-                </Link>
-            </div>
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+        <div className="px-2 text-center">
+
+          <Link to="/">
+            <Button variant="outline" className="mt-6 rounded-full shimmer-color-gray-400">
+              <ArrowLeft className="size-4" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
           Explore Destinations
         </h1>
         {search && (
@@ -180,8 +181,12 @@ export function DestinationListPage() {
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img
-                    src={d.image_url || '/placeholder.jpg'}
+                    src={buildImageUrl(d.image_url)}
                     alt={d.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/images/placeholder.jpg";
+                    }}
                     className="size-full object-cover transition group-hover:scale-105"
                   />
                   {d.ratings != null && (

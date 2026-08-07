@@ -31,7 +31,8 @@ class Destination(models.Model):
     longitude = models.FloatField()
 
     description = models.TextField(blank=True)
-    image_url = models.URLField(blank=True)
+    # destinations/models.py
+    image_url = models.CharField(max_length=500, blank=True, default="")
 
     ratings = models.FloatField(null=True, blank=True)
     popularity = models.FloatField(null=True, blank=True)

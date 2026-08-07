@@ -1,32 +1,48 @@
 import { Routes, Route } from "react-router-dom";
 
-import HomePage from "./pages/home/HomePage";
-import ItineraryPage from "./pages/itinerary/ItineraryPage";
-import DestinationListPage from "./pages/destination/DestinationListPage";
-import DestinationDetailPage from "./pages/destination/DestinationDetailPage";
-// import RecommendationPage from "@/pages/recommendation/RecommendationPage";
+import HomePage from "@/pages/home/HomePage";
+
+import DestinationListPage from "@/pages/destination/DestinationListPage";
+import DestinationDetailPage from "@/pages/destination/DestinationDetailPage";
+
+import RecommendationPage from "@/pages/recommendation/RecommendationPage";
+import ItineraryPage from "@/pages/itinerary/ItineraryPage";
+
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 
-// import ProfilePage from "@/pages/profile/ProfilePage";
+import ProfilePage from "@/pages/profile/ProfilePage";
+import ChangePassword from "@/pages/profile/ChangePassword";
 
-// import DashboardPage from "@/pages/admin/DashboardPage";
-// import RecommendationPage from "./pages/recommendation/RecommendationPage";
+import DashboardPage from "@/pages/admin/DashboardPage";
+
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AdminRoute from "@/components/auth/AdminRoute";
+
 function App() {
   return (
     <Routes>
+
+      {/*  PUBLIC ROUTES  */}
+
       <Route path="/" element={<HomePage />} />
-<Route path="/destination" element={<DestinationListPage />} />
-      <Route path="/destination/:id" element={<DestinationDetailPage />} />
+
       <Route
-        path="/itinerary"
-        element={<ItineraryPage />}
+        path="/destination"
+        element={<DestinationListPage />}
       />
-         {/* <Route
+
+      <Route
+        path="/destination/:id"
+        element={<DestinationDetailPage />}
+      />
+
+      <Route
         path="/recommendations"
         element={<RecommendationPage />}
-      /> */}
-   <Route
+      />
+
+      <Route
         path="/login"
         element={<LoginPage />}
       />
@@ -36,15 +52,38 @@ function App() {
         element={<RegisterPage />}
       />
 
-      {/* <Route
-        path="/profile"
-        element={<ProfilePage />}
-      /> */}
-{/* 
-      <Route
-        path="/admin/dashboard"
-        element={<DashboardPage />}
-      /> */}
+      {/*  USER ROUTES */}
+
+      <Route element={<ProtectedRoute />}>
+
+        <Route
+          path="/itinerary"
+          element={<ItineraryPage />}
+        />
+
+        <Route
+          path="/profile"
+          element={<ProfilePage />}
+        />
+
+        <Route
+          path="/profile/change-password"
+          element={<ChangePassword />}
+        />
+
+      </Route>
+
+      {/*  ADMIN ROUTES */}
+
+      <Route element={<AdminRoute />}>
+
+        <Route
+          path="/admin/dashboard"
+          element={<DashboardPage />}
+        />
+
+      </Route>
+
     </Routes>
   );
 }

@@ -72,6 +72,17 @@ class Review(models.Model):
         return f"{self.user} -> {self.destination} ({self.rating}/5)"
 
 
+class DestinationView(models.Model):
+    """A lightweight event recorded whenever a traveller opens a detail page."""
+    destination = models.ForeignKey(
+        Destination, related_name="detail_views", on_delete=models.CASCADE
+    )
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-viewed_at"]
+
+
 class TrekRoute(models.Model):
     name = models.CharField(max_length=200)
     entry_destination = models.ForeignKey(

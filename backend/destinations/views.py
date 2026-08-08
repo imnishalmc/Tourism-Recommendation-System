@@ -1,6 +1,9 @@
+from django.db import transaction
 from django.db.models import Avg, Count
 
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 
@@ -8,7 +11,7 @@ from accounts.permissions import IsAdminRole
 
 from ml.services.search_service import SearchService
 
-from .models import Destination, Review, RouteStage, TrekRoute
+from .models import Destination, DestinationView, Review, RouteStage, TrekRoute
 from .serializers import (
     DestinationSerializer,
     ReviewSerializer,
@@ -45,6 +48,13 @@ class DestinationViewSet(
 ):
 
     serializer_class = DestinationSerializer
+
+    @action(detail=True, methods=["post"], permission_classes=[AllowAny])
+    def record_view(self, request, pk=None):
+        """Record a detail-page visit without making page viewing require sign-in."""
+        destination = self.get_object()
+        DestinationView.objects.create(destination=destination)
+        return Response(status=204)
 
     def get_queryset(self):
 
@@ -203,7 +213,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
 
-        if self.action in ["list", "retrieve"]:
+        if self.action in ["list", "retrieve", "record_view"]:
             return [AllowAny()]
 
         if self.action in ["create", "update", "partial_update", "destroy"]:
@@ -211,18 +221,69 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
         return [AllowAny()]
 
+    @staticmethod
+    def _update_destination_summary(destination_id, rating_delta, review_delta):
+        """Update the destination's persisted rating and review total safely.
+
+        ``ratings`` and ``attraction_total_reviews`` may contain imported
+        historical data.  Each traveller review is therefore merged into that
+        existing weighted average rather than replacing it.
+        """
+        destination = Destination.objects.select_for_update().get(pk=destination_id)
+        previous_count = destination.attraction_total_reviews or 0
+        previous_average = destination.ratings
+        new_count = max(previous_count + review_delta, 0)
+
+        if new_count == 0:
+            destination.ratings = None
+        elif previous_average is None:
+            # There is no usable prior average to weight, so begin with the
+            # first available traveller rating.
+            destination.ratings = round(rating_delta / max(review_delta, 1), 2)
+        else:
+            destination.ratings = round(
+                ((previous_average * previous_count) + rating_delta) / new_count,
+                2,
+            )
+
+        destination.attraction_total_reviews = new_count
+        destination.save(update_fields=["ratings", "attraction_total_reviews"])
+
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        with transaction.atomic():
+            review = serializer.save(user=self.request.user)
+            self._update_destination_summary(
+                review.destination_id, rating_delta=review.rating, review_delta=1
+            )
 
     def perform_update(self, serializer):
         if serializer.instance.user != self.request.user and self.request.user.role != "admin":
             raise PermissionDenied("You can only edit your own reviews.")
-        serializer.save()
+        previous_rating = serializer.instance.rating
+        previous_destination_id = serializer.instance.destination_id
+        with transaction.atomic():
+            review = serializer.save()
+            if review.destination_id == previous_destination_id:
+                self._update_destination_summary(
+                    review.destination_id,
+                    rating_delta=review.rating - previous_rating,
+                    review_delta=0,
+                )
+            else:
+                self._update_destination_summary(
+                    previous_destination_id, rating_delta=-previous_rating, review_delta=-1
+                )
+                self._update_destination_summary(
+                    review.destination_id, rating_delta=review.rating, review_delta=1
+                )
 
     def perform_destroy(self, instance):
         if instance.user != self.request.user and self.request.user.role != "admin":
             raise PermissionDenied("You can only delete your own reviews.")
-        instance.delete()
+        with transaction.atomic():
+            destination_id, rating = instance.destination_id, instance.rating
+            instance.delete()
+            self._update_destination_summary(destination_id, rating_delta=-rating, review_delta=-1)
 
 
 class TrekRouteViewSet(

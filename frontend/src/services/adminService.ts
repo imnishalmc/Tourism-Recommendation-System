@@ -7,8 +7,51 @@ export interface AdminDashboard {
   active_users: number;
   destinations: number;
   reviews: number;
-  recent_reviews: Array<{ id: number; rating: number; comment: string; created_at: string; user__full_name: string; user__email: string; destination__name: string }>;
-  top_destinations: Array<{ id: number; name: string; district: string; review_total: number }>;
+  overview_metrics: Record<"users" | "destinations" | "reviews", {
+    this_month?: number;
+    percent_change?: number | null;
+    trend: number[];
+  }>;
+  user_registrations: Array<{
+    month: string;
+    users: number;
+    admins: number;
+  }>;
+  destination_categories: Array<{
+    name: string;
+    value: number;
+  }>;
+  province_distribution: Array<{
+    name: string;
+    value: number;
+  }>;
+  trending_destinations: Array<{
+    id: number;
+    name: string;
+    image_url: string;
+    main_category: string;
+    district: string;
+    province: string;
+    ratings: number | null;
+    monthly_views: number;
+    monthly_reviews: number;
+    monthly_average_rating: number | null;
+  }>;
+  most_reviewed: Array<{
+    id: number;
+    name: string;
+    district: string;
+    review_total: number;
+  }>;
+  recent_reviews: Array<{
+    id: number;
+    rating: number;
+    comment: string;
+    created_at: string;
+    user__full_name: string;
+    user__email: string;
+    destination__name: string;
+  }>;
 }
 
 export interface AdminReview {

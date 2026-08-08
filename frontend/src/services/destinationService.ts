@@ -49,5 +49,9 @@ export async function getDestination(id: number) {
     `/destinations/${id}/`
   );
 
+  // Viewing a detail page contributes to this month's trending destinations.
+  // A tracking failure must never prevent travellers from reading the page.
+  void api.post(`/destinations/${id}/record_view/`).catch(() => undefined);
+
   return response.data;
 }

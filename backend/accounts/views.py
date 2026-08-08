@@ -6,11 +6,15 @@ from .serializers import (
     UserSerializer,
     LoginSerializer,
     ChangePasswordSerializer,
+    AdminUserSerializer,
 )
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdminRole, IsRegularUser
+from .models import User
+from destinations.models import Destination, Review
+from django.db.models import Count
 
 
 class RegisterView(APIView):
@@ -96,3 +100,65 @@ class AdminOnlyView(APIView):
 
     def get(self, request):
         return Response({"message": "only the user can access this "})
+
+
+class AdminDashboardView(APIView):
+    permission_classes = [IsAdminRole]
+
+    def get(self, request):
+        return Response({
+            "users": User.objects.count(),
+            "active_users": User.objects.filter(is_active=True).count(),
+            "destinations": Destination.objects.count(),
+            "reviews": Review.objects.count(),
+            "recent_reviews": Review.objects.select_related("user", "destination").order_by("-created_at")[:5].values("id", "rating", "comment", "created_at", "user__full_name", "user__email", "destination__name"),
+            "top_destinations": Destination.objects.annotate(review_total=Count("reviews")).order_by("-review_total", "name")[:5].values("id", "name", "district", "review_total"),
+        })
+
+
+class AdminUserListView(APIView):
+    permission_classes = [IsAdminRole]
+
+    def get(self, request):
+        users = User.objects.order_by("-date_joined")
+        search = request.query_params.get("search", "").strip()
+        role = request.query_params.get("role")
+        is_active = request.query_params.get("is_active")
+        if search:
+            users = users.filter(email__icontains=search) | users.filter(full_name__icontains=search)
+        if role in ["admin", "user"]:
+            users = users.filter(role=role)
+        if is_active in ["true", "false"]:
+            users = users.filter(is_active=is_active == "true")
+        return Response(AdminUserSerializer(users, many=True).data)
+
+
+class AdminUserDetailView(APIView):
+    permission_classes = [IsAdminRole]
+
+    def patch(self, request, user_id):
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        if user == request.user and request.data.get("is_active") is False:
+            return Response({"detail": "You cannot deactivate your own account."}, status=status.HTTP_400_BAD_REQUEST)
+        if user == request.user and request.data.get("role") == "user":
+            return Response({"detail": "You cannot remove your own admin role."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AdminUserSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        updated_user = serializer.save()
+        if "role" in serializer.validated_data:
+            updated_user.is_staff = updated_user.role == "admin" or updated_user.is_superuser
+            updated_user.save(update_fields=["is_staff"])
+        return Response(AdminUserSerializer(updated_user).data)
+
+    def delete(self, request, user_id):
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        if user == request.user:
+            return Response({"detail": "You cannot delete your own account."}, status=status.HTTP_400_BAD_REQUEST)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

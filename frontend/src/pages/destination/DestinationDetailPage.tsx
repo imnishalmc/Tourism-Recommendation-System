@@ -20,6 +20,7 @@ import {
 } from "@/constants/categories";
 
 import { buildImageUrl, buildImageUrlCandidates } from '@/lib/destinationImages'
+import { ReviewSection } from "@/components/destination/ReviewSection";
 
 const difficultyStyles: Record<string, string> = {
   easy: "bg-soft-green text-secondary",
@@ -159,6 +160,7 @@ export default function DestinationDetailPage() {
 
             if (nextIndex >= sources.length) {
               e.currentTarget.onerror = null;
+              e.currentTarget.style.display = "none";
               return;
             }
 
@@ -333,6 +335,8 @@ export default function DestinationDetailPage() {
 
           </div>
         )}
+
+      <ReviewSection destinationId={destination.id} />
 
     </article>
   );

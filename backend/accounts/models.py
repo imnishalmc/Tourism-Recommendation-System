@@ -33,7 +33,8 @@ class User(AbstractUser):
     interests = models.JSONField(default=list, blank=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    # `createsuperuser` will now prompt for the administrator's name.
+    REQUIRED_FIELDS = ["full_name"]
     objects = UserManager()
 
     def __str__(self):

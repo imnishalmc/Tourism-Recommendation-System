@@ -15,6 +15,10 @@ import ProfilePage from "@/pages/profile/ProfilePage";
 import ChangePassword from "@/pages/profile/ChangePassword";
 
 import DashboardPage from "@/pages/admin/DashboardPage";
+import UserManagementPage from "@/pages/admin/UserManagementPage";
+import DestinationManagementPage from "@/pages/admin/DestinationManagementPage";
+import ReviewManagementPage from "@/pages/admin/ReviewManagementPage";
+import AdminLayout from "@/layouts/AdminLayout";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/components/auth/AdminRoute";
@@ -76,12 +80,12 @@ function App() {
       {/*  ADMIN ROUTES */}
 
       <Route element={<AdminRoute />}>
-
-        <Route
-          path="/admin/dashboard"
-          element={<DashboardPage />}
-        />
-
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="destinations" element={<DestinationManagementPage />} />
+          <Route path="reviews" element={<ReviewManagementPage />} />
+        </Route>
       </Route>
 
     </Routes>

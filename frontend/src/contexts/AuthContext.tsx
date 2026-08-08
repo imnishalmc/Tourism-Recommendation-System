@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import api from "@/services/api";
 import type { User } from "@/types/auth";
 import { AuthContext } from "./auth-context";
-import type { AuthContextType } from "./auth-context";
 interface LoginResponse {
   access: string;
   refresh: string;

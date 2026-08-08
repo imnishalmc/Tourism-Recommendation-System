@@ -48,10 +48,10 @@ export function DestinationsSection() {
     async function loadDestinations() {
       try {
         const data = await getDestinations({
-          ordering: "-popularity",
+          is_featured: "true",
         });
 
-        setDestinations(data.results.slice(0, 6));
+        setDestinations(data.results);
       } catch (err) {
         console.error(err);
       } finally {
@@ -132,6 +132,7 @@ export function DestinationsSection() {
 
                       if (nextIndex >= sources.length) {
                         e.currentTarget.onerror = null;
+                        e.currentTarget.style.display = "none";
                         return;
                       }
 

@@ -6,12 +6,14 @@ from .models import Destination, Review, RouteStage, TrekRoute
 class ReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source="user.full_name", read_only=True)
     user_email = serializers.EmailField(source="user.email", read_only=True)
+    destination_name = serializers.CharField(source="destination.name", read_only=True)
 
     class Meta:
         model = Review
         fields = [
             "id",
             "destination",
+            "destination_name",
             "user",
             "user_name",
             "user_email",
@@ -28,6 +30,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class DestinationSerializer(serializers.ModelSerializer):
+    # A CharField deliberately permits imported base64 data and local image paths,
+    # in addition to normal http(s) URLs.
+    image_url = serializers.CharField(required=False, allow_blank=True)
     average_review_rating = serializers.FloatField(read_only=True)
     review_count = serializers.IntegerField(read_only=True)
 
@@ -56,6 +61,7 @@ class DestinationSerializer(serializers.ModelSerializer):
             "popularity",
             "attraction_total_reviews",
             "is_trek_entry",
+            "is_featured",
             "average_review_rating",
             "review_count",
             "created_at",
@@ -66,6 +72,37 @@ class DestinationSerializer(serializers.ModelSerializer):
             "review_count",
             "created_at",
         ]
+
+    def validate_main_category(self, value):
+        # Accept the concise labels used by the administration form.
+        aliases = {
+            "nature": "natural",
+            "culture": "cultural_religious",
+            "adventure": "trekking_adventure",
+            "religious": "cultural_religious",
+        }
+        return aliases.get(value, value)
+
+    def validate(self, attrs):
+        # An unchanged local image is sometimes represented by an empty form
+        # field. Do not erase an existing image when the administrator saves
+        # other destination details.
+        if (
+            self.instance
+            and attrs.get("image_url") == ""
+            and self.instance.image_url
+        ):
+            attrs.pop("image_url")
+        if not self.instance:
+            # These are internal recommendation values, not fields admins need
+            # to enter when adding a dataset-style destination.
+            attrs.setdefault("latitude", 0)
+            attrs.setdefault("longitude", 0)
+            attrs.setdefault("budget_level", "medium")
+        return attrs
+
+    def validate_ratings(self, value):
+        return value
 
 
 class RouteStageSerializer(serializers.ModelSerializer):

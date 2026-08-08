@@ -199,6 +199,7 @@ export function DestinationListPage() {
 
                       if (nextIndex >= sources.length) {
                         e.currentTarget.onerror = null;
+                        e.currentTarget.style.display = "none";
                         return;
                       }
 

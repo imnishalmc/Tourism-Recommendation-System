@@ -7,6 +7,7 @@ export interface User {
 
   is_staff: boolean;
   is_superuser: boolean;
+  is_active: boolean;
 
   trip_duration: number | null;
   interests: string[];

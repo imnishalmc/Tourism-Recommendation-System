@@ -37,6 +37,9 @@ export interface Destination {
   visit_duration_days?: number;
   review_count?: number;
   tags?: string[];
+  is_trek_entry?: boolean;
+  is_featured?: boolean;
+  attraction_total_reviews?: number;
 }
 
 export interface PaginatedResponse<T> {

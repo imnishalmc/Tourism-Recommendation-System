@@ -12,6 +12,7 @@ export interface DestinationFilters {
   crowd_level?: string;
   budget_level?: string;
   ordering?: string;
+  is_featured?: string;
 }
 
 export async function getDestinations(

@@ -11,11 +11,19 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "full_name",
             "role",
+            "is_staff",
+            "is_superuser",
+            "is_active",
             "trip_duration",
             "interests",
             "date_joined",
         ]
-        read_only_fields = ["id", "role", "date_joined"]
+        read_only_fields = ["id", "role", "is_staff", "is_superuser", "is_active", "date_joined"]
+
+
+class AdminUserSerializer(UserSerializer):
+    class Meta(UserSerializer.Meta):
+        read_only_fields = ["id", "is_staff", "is_superuser", "date_joined"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):

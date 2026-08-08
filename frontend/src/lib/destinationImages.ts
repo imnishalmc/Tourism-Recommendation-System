@@ -77,11 +77,6 @@ function buildDestinationNameCandidates(destinationName: string): string[] {
 }
 
 function buildFolderCandidates(folder: string): string[] {
-  const encodedFolder = folder
-    .split("/")
-    .map((segment) => encodePathSegment(segment))
-    .join("/");
-
   const destinationName = folder
     .split("/")
     .map((segment) => segment.trim())
@@ -138,6 +133,12 @@ function normalizeImageUrlSources(
     return [];
   }
 
+  // A data URI contains a comma between its metadata and encoded bytes. It is
+  // one image source, not a comma-separated list of image sources.
+  if (/^(data:)?image\/[a-z0-9.+-]+;base64,/i.test(rawValue)) {
+    return [rawValue];
+  }
+
   if (/^\[.*\]$/.test(rawValue)) {
     try {
       const parsed = JSON.parse(rawValue);
@@ -176,6 +177,17 @@ export function buildImageUrlCandidates(
         .map((p) => encodeURIComponent(p.trim()));
       const folder = parts.slice(0, -1).join("/");
       candidates.push(...buildFolderCandidates(folder));
+      continue;
+    }
+
+    // Some imported records omit the `data:` part of a base64 image URI.
+    if (/^image\/[a-z0-9.+-]+;base64,/i.test(normalizedSource)) {
+      candidates.push(`data:${normalizedSource}`);
+      continue;
+    }
+
+    if (/^data:image\//i.test(normalizedSource)) {
+      candidates.push(normalizedSource);
       continue;
     }
 

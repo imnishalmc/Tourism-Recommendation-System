@@ -34,7 +34,8 @@ class Destination(models.Model):
     longitude = models.FloatField()
 
     description = models.TextField(blank=True)
-    image_url = models.URLField(blank=True)
+    # Images can be an external URL, a local path, or imported base64 image data.
+    image_url = models.TextField(blank=True)
 
     ratings = models.FloatField(null=True, blank=True)
     popularity = models.FloatField(null=True, blank=True)
@@ -43,6 +44,9 @@ class Destination(models.Model):
     is_trek_entry = models.BooleanField(
         default=False
     )  # flags candidates linked to a TrekRoute
+    is_featured = models.BooleanField(
+        default=False
+    )  # explicitly selected for the popular destinations homepage section
 
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -2,6 +2,7 @@ from django.db.models import Avg, Count
 
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 
 from accounts.permissions import IsAdminRole
 
@@ -16,7 +17,16 @@ from .serializers import (
 )
 
 
-search_service = SearchService()
+# Do not construct this at module import time. Django imports URL views before
+# migration commands run, and the search service queries the destination table.
+_search_service = None
+
+
+def get_search_service():
+    global _search_service
+    if _search_service is None:
+        _search_service = SearchService()
+    return _search_service
 
 
 class ReadOnlyOrAdminMixin:
@@ -38,6 +48,8 @@ class DestinationViewSet(
 
     def get_queryset(self):
 
+        search_service = get_search_service()
+
         queryset = Destination.objects.annotate(
             average_review_rating=Avg("reviews__rating"),
             review_count=Count("reviews"),
@@ -52,6 +64,7 @@ class DestinationViewSet(
         budget_level = self.request.query_params.get("budget_level")
         crowd_level = self.request.query_params.get("crowd_level")
         is_trek_entry = self.request.query_params.get("is_trek_entry")
+        is_featured = self.request.query_params.get("is_featured")
 
         if not search and not any(
             [
@@ -61,6 +74,7 @@ class DestinationViewSet(
                 crowd_level,
                 budget_level,
                 is_trek_entry,
+                is_featured,
             ]
         ):
             return queryset
@@ -129,6 +143,11 @@ class DestinationViewSet(
                 results["is_trek_entry"] == trek_value
             ]
 
+        if is_featured is not None:
+            queryset = queryset.filter(
+                is_featured=is_featured.lower() == "true"
+            )
+
         if results.empty:
             return queryset.none()
 
@@ -187,10 +206,23 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "retrieve"]:
             return [AllowAny()]
 
-        return [IsAuthenticated()]
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAuthenticated()]
+
+        return [AllowAny()]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.user != self.request.user and self.request.user.role != "admin":
+            raise PermissionDenied("You can only edit your own reviews.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.user != self.request.user and self.request.user.role != "admin":
+            raise PermissionDenied("You can only delete your own reviews.")
+        instance.delete()
 
 
 class TrekRouteViewSet(

@@ -13,7 +13,7 @@ import {
   CROWD_LEVELS,
   BUDGET_LEVELS,
 } from '@/constants/categories'
-import { buildImageUrl } from '@/lib/destinationImages'
+import { buildImageUrl, buildImageUrlCandidates } from '@/lib/destinationImages'
 
 const difficultyStyles: Record<string, string> = {
   easy: 'bg-soft-green text-secondary',
@@ -181,11 +181,29 @@ export function DestinationListPage() {
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img
-                    src={buildImageUrl(d.image_url)}
+                    src={buildImageUrl(
+                      d.image_url,
+                      d.name
+                    )}
                     alt={d.name}
+                    data-image-index="0"
                     onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/images/placeholder.jpg";
+                      const sources = buildImageUrlCandidates(
+                        d.image_url,
+                        d.name
+                      );
+                      const currentIndex = Number(
+                        e.currentTarget.dataset.imageIndex || 0
+                      );
+                      const nextIndex = currentIndex + 1;
+
+                      if (nextIndex >= sources.length) {
+                        e.currentTarget.onerror = null;
+                        return;
+                      }
+
+                      e.currentTarget.dataset.imageIndex = String(nextIndex);
+                      e.currentTarget.src = sources[nextIndex];
                     }}
                     className="size-full object-cover transition group-hover:scale-105"
                   />

@@ -7,27 +7,29 @@ export interface Destination {
   main_category: string;
 
   difficulty_level:
-    | "easy"
-    | "moderate"
-    | "hard"
-    | "very_hard";
+  | "easy"
+  | "moderate"
+  | "hard"
+  | "very_hard";
 
   crowd_level:
-    | "very_low"
-    | "low"
-    | "moderate"
-    | "high"
-    | "very_high";
+  | "very_low"
+  | "low"
+  | "moderate"
+  | "high"
+  | "very_high";
 
   budget_level?: "low" | "medium" | "high";
 
   description: string;
-  image_url: string;
+  image_url?: string | string[];
+  latitude?: number;
+  longitude?: number;
 
   ratings: number | null;
   popularity: number | null;
 
-  
+
   best_season?: string;
   activities?: string;
   accessibility?: string;

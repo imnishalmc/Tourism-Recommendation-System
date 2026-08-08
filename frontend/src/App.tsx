@@ -6,7 +6,6 @@ import DestinationListPage from "@/pages/destination/DestinationListPage";
 import DestinationDetailPage from "@/pages/destination/DestinationDetailPage";
 
 import RecommendationPage from "@/pages/recommendation/RecommendationPage";
-import ItineraryPage from "@/pages/itinerary/ItineraryPage";
 
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
@@ -18,6 +17,8 @@ import DashboardPage from "@/pages/admin/DashboardPage";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/components/auth/AdminRoute";
+import ItineraryPage from "@/pages/itinerary/ItineraryPage";
+
 
 function App() {
   return (
@@ -83,6 +84,7 @@ function App() {
         />
 
       </Route>
+      <Route path="/itinerary" element={<ItineraryPage />} />
 
     </Routes>
   );

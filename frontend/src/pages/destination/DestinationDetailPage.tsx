@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Clock,
   MapPin,
   Star,
   Users,
+  Calendar,
 } from "lucide-react";
-
+import { RecommendedDestinations } from "@/components/destinations/RecommendedDestinations";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +20,7 @@ import {
   CROWD_LEVELS,
 } from "@/constants/categories";
 
-import { buildImageUrl } from "@/lib/destinationImages";
+import { buildImageUrl, buildImageUrlCandidates } from '@/lib/destinationImages'
 
 const difficultyStyles: Record<string, string> = {
   easy: "bg-soft-green text-secondary",
@@ -45,6 +46,7 @@ function label(
 
 export default function DestinationDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate(); // ✅ top-level hook, alongside useParams/useState
 
   const [destination, setDestination] =
     useState<Destination | null>(null);
@@ -91,6 +93,7 @@ export default function DestinationDetailPage() {
 
     load();
 
+    // ✅ no hook call here — just the cleanup function
     return () => {
       cancelled = true;
     };
@@ -141,11 +144,29 @@ export default function DestinationDetailPage() {
 
       <div className="mt-6 overflow-hidden rounded-3xl shadow-lg">
         <img
-          src={buildImageUrl(destination.image_url)}
+          src={buildImageUrl(
+            destination.image_url,
+            destination.name
+          )}
           alt={destination.name}
+          data-image-index="0"
           onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "/images/placeholder.jpg";
+            const sources = buildImageUrlCandidates(
+              destination.image_url,
+              destination.name
+            );
+            const currentIndex = Number(
+              e.currentTarget.dataset.imageIndex || 0
+            );
+            const nextIndex = currentIndex + 1;
+
+            if (nextIndex >= sources.length) {
+              e.currentTarget.onerror = null;
+              return;
+            }
+
+            e.currentTarget.dataset.imageIndex = String(nextIndex);
+            e.currentTarget.src = sources[nextIndex];
           }}
           className="h-[450px] w-full object-cover"
         />
@@ -228,6 +249,28 @@ export default function DestinationDetailPage() {
           </span>
         )}
 
+      </div>
+
+      {/* Plan around this destination */}
+
+      <div className="mt-8 rounded-2xl border p-6">
+        <h3 className="flex items-center gap-2 font-semibold">
+          <Calendar className="h-4 w-4 text-primary" />
+          Plan around {destination.name}
+        </h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Build a day-by-day itinerary around this destination.
+        </p>
+        <Button
+          className="mt-4 w-full rounded-full"
+          onClick={() =>
+            navigate(
+              `/itinerary?destination=${encodeURIComponent(destination.name)}&id=${destination.id}`
+            )
+          }
+        >
+          Generate itinerary
+        </Button>
       </div>
 
       {/* Description */}
@@ -315,7 +358,7 @@ export default function DestinationDetailPage() {
 
           </div>
         )}
-
+    <RecommendedDestinations destinationId={destination.id} destinationName={destination.name} />
     </article>
   );
 }

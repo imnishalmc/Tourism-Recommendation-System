@@ -5,14 +5,38 @@ class ItinerarySerializer(serializers.Serializer):
 
     destination = serializers.CharField()
 
-    days = serializers.IntegerField()
+    days = serializers.IntegerField(
+        min_value=1
+    )
 
-    budget = serializers.IntegerField()
+    budget = serializers.CharField()
 
-    travelers = serializers.IntegerField()
+    travelers = serializers.IntegerField(
+        required=False,
+        default=1,
+        min_value=1
+    )
 
-    pace = serializers.CharField()
+    pace = serializers.CharField(
+        required=False,
+        default="moderate",
+        allow_blank=True
+    )
 
     interests = serializers.ListField(
-        child=serializers.CharField()
+        child=serializers.CharField(),
+        allow_empty=False
+    )
+
+    starting_location = serializers.CharField(
+        required=False,
+        allow_blank=True
+    )
+
+    latitude = serializers.FloatField(
+        required=False
+    )
+
+    longitude = serializers.FloatField(
+        required=False
     )

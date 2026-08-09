@@ -1,8 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Avg, Count
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
@@ -19,7 +21,7 @@ from .serializers import (
     TrekRouteSerializer,
 )
 
-
+User = get_user_model()
 # Do not construct this at module import time. Django imports URL views before
 # migration commands run, and the search service queries the destination table.
 _search_service = None
@@ -33,7 +35,6 @@ def get_search_service():
 
 
 class ReadOnlyOrAdminMixin:
-
     def get_permissions(self):
 
         if self.action in ["list", "retrieve"]:
@@ -42,11 +43,44 @@ class ReadOnlyOrAdminMixin:
         return [IsAdminRole()]
 
 
+class SiteStatsView(APIView):
+    """
+    Public statistics used by the homepage.
+
+    Returns real values from the database instead of hardcoded numbers.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        destination_count = Destination.objects.count()
+
+        route_count = TrekRoute.objects.count()
+
+        province_count = (
+            Destination.objects.exclude(province__isnull=True)
+            .exclude(province__exact="")
+            .values("province")
+            .distinct()
+            .count()
+        )
+
+        registered_traveler_count = User.objects.count()
+
+        return Response(
+            {
+                "destinations": destination_count,
+                "travel_routes": route_count,
+                "provinces_covered": province_count,
+                "registered_travelers": registered_traveler_count,
+            }
+        )
+
+
 class DestinationViewSet(
     ReadOnlyOrAdminMixin,
     viewsets.ModelViewSet,
 ):
-
     serializer_class = DestinationSerializer
 
     @action(detail=True, methods=["post"], permission_classes=[AllowAny])
@@ -68,9 +102,7 @@ class DestinationViewSet(
         search = self.request.query_params.get("search")
         main_category = self.request.query_params.get("main_category")
         district = self.request.query_params.get("district")
-        difficulty_level = self.request.query_params.get(
-            "difficulty_level"
-        )
+        difficulty_level = self.request.query_params.get("difficulty_level")
         budget_level = self.request.query_params.get("budget_level")
         crowd_level = self.request.query_params.get("crowd_level")
         is_trek_entry = self.request.query_params.get("is_trek_entry")
@@ -90,7 +122,6 @@ class DestinationViewSet(
             return queryset
 
         if search:
-
             results = search_service.search(
                 query=search,
                 category=main_category,
@@ -102,7 +133,6 @@ class DestinationViewSet(
             )
 
         else:
-
             results = search_service.df.copy()
 
             if main_category:
@@ -144,39 +174,23 @@ class DestinationViewSet(
                 ]
 
         if is_trek_entry is not None:
+            trek_value = is_trek_entry.lower() == "true"
 
-            trek_value = (
-                is_trek_entry.lower() == "true"
-            )
-
-            results = results[
-                results["is_trek_entry"] == trek_value
-            ]
+            results = results[results["is_trek_entry"] == trek_value]
 
         if is_featured is not None:
-            queryset = queryset.filter(
-                is_featured=is_featured.lower() == "true"
-            )
+            queryset = queryset.filter(is_featured=is_featured.lower() == "true")
 
         if results.empty:
             return queryset.none()
 
-        destination_names = (
-            results["destination"]
-            .astype(str)
-            .tolist()
-        )
+        destination_names = results["destination"].astype(str).tolist()
 
         preserved_order = {
-            name.lower(): index
-            for index, name in enumerate(
-                destination_names
-            )
+            name.lower(): index for index, name in enumerate(destination_names)
         }
 
-        queryset = queryset.filter(
-            name__in=destination_names
-        )
+        queryset = queryset.filter(name__in=destination_names)
 
         queryset = sorted(
             queryset,
@@ -190,7 +204,6 @@ class DestinationViewSet(
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
@@ -200,14 +213,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
             "user",
         ).order_by("-created_at")
 
-        destination = self.request.query_params.get(
-            "destination"
-        )
+        destination = self.request.query_params.get("destination")
 
         if destination:
-            queryset = queryset.filter(
-                destination_id=destination
-            )
+            queryset = queryset.filter(destination_id=destination)
 
         return queryset
 
@@ -257,7 +266,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
             )
 
     def perform_update(self, serializer):
-        if serializer.instance.user != self.request.user and self.request.user.role != "admin":
+        if (
+            serializer.instance.user != self.request.user
+            and self.request.user.role != "admin"
+        ):
             raise PermissionDenied("You can only edit your own reviews.")
         previous_rating = serializer.instance.rating
         previous_destination_id = serializer.instance.destination_id
@@ -271,7 +283,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 )
             else:
                 self._update_destination_summary(
-                    previous_destination_id, rating_delta=-previous_rating, review_delta=-1
+                    previous_destination_id,
+                    rating_delta=-previous_rating,
+                    review_delta=-1,
                 )
                 self._update_destination_summary(
                     review.destination_id, rating_delta=review.rating, review_delta=1
@@ -283,14 +297,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             destination_id, rating = instance.destination_id, instance.rating
             instance.delete()
-            self._update_destination_summary(destination_id, rating_delta=-rating, review_delta=-1)
+            self._update_destination_summary(
+                destination_id, rating_delta=-rating, review_delta=-1
+            )
 
 
 class TrekRouteViewSet(
     ReadOnlyOrAdminMixin,
     viewsets.ModelViewSet,
 ):
-
     serializer_class = TrekRouteSerializer
 
     def get_queryset(self):
@@ -300,23 +315,15 @@ class TrekRouteViewSet(
             "exit_destination",
         ).prefetch_related("stages")
 
-        difficulty_level = self.request.query_params.get(
-            "difficulty_level"
-        )
+        difficulty_level = self.request.query_params.get("difficulty_level")
 
-        max_days = self.request.query_params.get(
-            "max_days"
-        )
+        max_days = self.request.query_params.get("max_days")
 
         if difficulty_level:
-            queryset = queryset.filter(
-                difficulty_level=difficulty_level
-            )
+            queryset = queryset.filter(difficulty_level=difficulty_level)
 
         if max_days:
-            queryset = queryset.filter(
-                total_days__lte=max_days
-            )
+            queryset = queryset.filter(total_days__lte=max_days)
 
         return queryset.order_by(
             "total_days",
@@ -328,25 +335,18 @@ class RouteStageViewSet(
     ReadOnlyOrAdminMixin,
     viewsets.ModelViewSet,
 ):
-
     serializer_class = RouteStageSerializer
 
     def get_queryset(self):
 
-        queryset = RouteStage.objects.select_related(
-            "route"
-        ).order_by(
+        queryset = RouteStage.objects.select_related("route").order_by(
             "route",
             "day_number",
         )
 
-        route = self.request.query_params.get(
-            "route"
-        )
+        route = self.request.query_params.get("route")
 
         if route:
-            queryset = queryset.filter(
-                route_id=route
-            )
+            queryset = queryset.filter(route_id=route)
 
         return queryset

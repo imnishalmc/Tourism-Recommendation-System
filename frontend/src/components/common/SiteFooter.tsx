@@ -1,25 +1,20 @@
-import { Mountain, Globe, MessageCircle, Send, Mail } from 'lucide-react'
 
-const columns = [
-  {
-    title: 'Explore',
-    links: ['Destinations', 'Districts', 'Activities', 'Trekking Routes'],
-  },
-  {
-    title: 'Recommendations',
-    links: ['AI Matches', 'Popular Trips', 'Seasonal Picks', 'Hidden Gems'],
-  },
-  {
-    title: 'Company',
-    links: ['About', 'Privacy', 'Contact', 'Careers'],
-  },
-]
 
-const socials = [
-  { icon: Globe, label: 'Website' },
-  { icon: MessageCircle, label: 'Community' },
-  { icon: Send, label: 'Telegram' },
-  { icon: Mail, label: 'Email' },
+import {Link} from "react-router-dom";
+import {Mountain} from "lucide-react";
+const columns=[
+    {
+    title:"Home",
+    links:[{label:"Home",to:"/"}]
+  },
+  {
+    title:"Explore",
+    links:[{label:"Destinations",to:"/destination"}]
+  },
+  {
+    title:"Itinerary",
+    links:[{label:"AI Matches",to:"/itinerary"}]
+  }
 ]
 
 export function SiteFooter() {
@@ -40,18 +35,7 @@ export function SiteFooter() {
               AI-powered travel recommendations and smart itineraries to help
               you discover Nepal, smarter.
             </p>
-            <div className="mt-6 flex gap-3">
-              {socials.map((s) => (
-                <a
-                  key={s.label}
-                  href="#"
-                  aria-label={s.label}
-                  className="flex size-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:bg-light-blue hover:text-primary"
-                >
-                  <s.icon className="size-4" />
-                </a>
-              ))}
-            </div>
+    
           </div>
 
           {columns.map((col) => (
@@ -59,13 +43,13 @@ export function SiteFooter() {
               <h3 className="text-sm font-semibold">{col.title}</h3>
               <ul className="mt-4 space-y-3">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
+                  <li key={link.label}>
+                     <Link
+                      to={link.to}
                       className="text-sm text-muted-foreground transition-colors hover:text-primary"
                     >
-                      {link}
-                    </a>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

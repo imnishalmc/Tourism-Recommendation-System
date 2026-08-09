@@ -41,7 +41,14 @@ export async function getDestinations(
     };
   }
 
-  return responseData;
+  // Some deployments return a plain object without pagination metadata.
+  // Always give the UI an array so list pages never render against undefined.
+  return {
+    count: Number(responseData?.count) || 0,
+    next: responseData?.next ?? null,
+    previous: responseData?.previous ?? null,
+    results: Array.isArray(responseData?.results) ? responseData.results : [],
+  };
 }
 
 export async function getDestination(id: number) {

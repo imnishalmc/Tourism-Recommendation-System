@@ -80,8 +80,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto mt-20 max-w-md rounded-xl border bg-white p-8 shadow-lg">
-      <h1 className="mb-2 text-center text-3xl font-bold">
+    <div className="mx-4 mt-8 max-w-md rounded-xl border bg-white p-5 shadow-lg sm:mx-auto sm:mt-20 sm:p-8">
+      <h1 className="mb-2 text-center text-2xl font-bold sm:text-3xl">
         Create Account
       </h1>
 

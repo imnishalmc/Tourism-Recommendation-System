@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Clock,
   MapPin,
   Star,
   Users,
+  Calendar,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -21,6 +22,7 @@ import {
 
 import { buildImageUrl, buildImageUrlCandidates } from '@/lib/destinationImages'
 import { ReviewSection } from "@/components/destination/ReviewSection";
+import { RecommendedDestinations } from "@/components/destinations/RecommendedDestinations";
 
 const difficultyStyles: Record<string, string> = {
   easy: "bg-soft-green text-secondary",
@@ -46,6 +48,7 @@ function label(
 
 export default function DestinationDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [destination, setDestination] =
     useState<Destination | null>(null);
@@ -128,7 +131,7 @@ export default function DestinationDetailPage() {
   }
 
   return (
-    <article className="mx-auto max-w-6xl px-5 py-10">
+    <article className="mx-auto max-w-6xl px-4 py-6 sm:px-5 sm:py-10">
 
       <Link
         to="/destination"
@@ -167,17 +170,17 @@ export default function DestinationDetailPage() {
             e.currentTarget.dataset.imageIndex = String(nextIndex);
             e.currentTarget.src = sources[nextIndex];
           }}
-          className="h-[450px] w-full object-cover"
+          className="h-64 w-full object-cover sm:h-80 lg:h-[450px]"
         />
       </div>
 
       {/* Header */}
 
-      <div className="mt-8 flex flex-col justify-between gap-5 lg:flex-row">
+      <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-8 lg:flex-row">
 
         <div>
 
-          <h1 className="text-4xl font-bold">
+            <h1 className="break-words text-3xl font-bold sm:text-4xl">
             {destination.name}
           </h1>
 
@@ -335,6 +338,17 @@ export default function DestinationDetailPage() {
 
           </div>
         )}
+
+      <div className="mt-10 rounded-2xl border p-6">
+        <h3 className="flex items-center gap-2 font-semibold"><Calendar className="h-4 w-4 text-primary" />Plan around {destination.name}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">Build a day-by-day itinerary around this destination.</p>
+        <Button className="mt-4 w-full rounded-full" onClick={() => navigate(`/itinerary?destination=${encodeURIComponent(destination.name)}`)}>Generate itinerary</Button>
+      </div>
+
+      <RecommendedDestinations
+        destinationId={destination.id}
+        destinationName={destination.name}
+      />
 
       <ReviewSection destinationId={destination.id} />
 

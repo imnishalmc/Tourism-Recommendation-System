@@ -5,7 +5,6 @@ import HomePage from "@/pages/home/HomePage";
 import DestinationListPage from "@/pages/destination/DestinationListPage";
 import DestinationDetailPage from "@/pages/destination/DestinationDetailPage";
 
-import RecommendationPage from "@/pages/recommendation/RecommendationPage";
 import ItineraryPage from "@/pages/itinerary/ItineraryPage";
 
 import LoginPage from "@/pages/auth/LoginPage";
@@ -39,11 +38,6 @@ function App() {
       <Route
         path="/destination/:id"
         element={<DestinationDetailPage />}
-      />
-
-      <Route
-        path="/recommendations"
-        element={<RecommendationPage />}
       />
 
       <Route

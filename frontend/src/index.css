@@ -6,6 +6,7 @@
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
 }
 @theme inline {
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -162,6 +163,24 @@ body {
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+  }
+}
+@keyframes trail-draw {
+  from { stroke-dasharray: 700; stroke-dashoffset: 700; }
+  to { stroke-dasharray: 700; stroke-dashoffset: 0; }
+}
+.animate-trail-draw { stroke-dasharray: 700; animation: trail-draw 1.8s ease-in-out infinite alternate; }
+
+/* Keep the dashboard's destination and review panels stacked. */
+#dashboard-insights + div {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+@media (max-width: 640px) {
+  main table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 

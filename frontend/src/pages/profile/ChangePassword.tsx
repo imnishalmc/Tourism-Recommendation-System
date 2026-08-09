@@ -57,8 +57,8 @@ export default function ChangePassword() {
   }
 
   return (
-    <div className="mx-auto mt-12 max-w-md rounded-xl border bg-white p-8 shadow">
-      <h1 className="mb-6 text-3xl font-bold">
+    <div className="mx-4 mt-8 max-w-md rounded-xl border bg-white p-5 shadow sm:mx-auto sm:mt-12 sm:p-8">
+      <h1 className="mb-6 text-2xl font-bold sm:text-3xl">
         Change Password
       </h1>
 

@@ -43,15 +43,21 @@ export function DestinationsSection() {
   >([]);
 
   const [loading, setLoading] = useState(true);
+  // Keep the render safe even if Vite preserves an older invalid state during
+  // hot reload, or an unexpected API response reaches this component.
+  const destinationList = Array.isArray(destinations) ? destinations : [];
 
   useEffect(() => {
     async function loadDestinations() {
       try {
         const data = await getDestinations({
           is_featured: "true",
+          ordering: "-popularity",
         });
 
-        setDestinations(data.results);
+        setDestinations(
+          Array.isArray(data.results) ? data.results.slice(0, 6) : []
+        );
       } catch (err) {
         console.error(err);
       } finally {
@@ -97,14 +103,14 @@ export function DestinationsSection() {
           <p className="mt-12 text-center">
             Loading destinations...
           </p>
-        ) : destinations.length === 0 ? (
+        ) : destinationList.length === 0 ? (
           <p className="mt-12 text-center">
             No destinations found.
           </p>
         ) : (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-            {destinations.map((d) => (
+            {destinationList.map((d) => (
 
               <article
                 key={d.id}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { Star, ArrowRight, X } from 'lucide-react'
+import { Star, ArrowRight, Calendar, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { getDestinations } from '@/services/destinationService'
@@ -84,7 +84,7 @@ export function DestinationListPage() {
   const hasActiveFilters = search || mainCategory || difficulty || crowd || budget
 
   return (
-    <section className="mx-auto max-w-7xl px-5 py-16 md:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-10 sm:px-5 sm:py-16 md:px-8">
 
       <div className="m-2">
         <div className="px-2 text-center">
@@ -209,7 +209,7 @@ export function DestinationListPage() {
                     className="size-full object-cover transition group-hover:scale-105"
                   />
                   {d.ratings != null && (
-                    <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-background px-3 py-1 text-sm font-semibold">
+                    <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-background px-3 py-1 text-sm font-semibold">
                       <Star className="size-3.5 fill-amber-400 text-amber-400" />
                       {d.ratings.toFixed(1)}
                     </span>
@@ -227,12 +227,14 @@ export function DestinationListPage() {
                     </span>
                   </div>
                   <p className="mt-4 line-clamp-3 text-sm text-muted-foreground">{d.description}</p>
-                  <Link to={`/destination/${d.id}`}>
-                    <Button variant="outline" className="mt-5 w-full rounded-full font-semibold">
-                      View Details
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </Link>
+                  <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <Link to={`/destination/${d.id}`}>
+                      <Button variant="outline" className="w-full rounded-full font-semibold">View Details <ArrowRight className="size-4" /></Button>
+                    </Link>
+                    <Link to={`/itinerary?destination=${encodeURIComponent(d.name)}`}>
+                      <Button className="w-full rounded-full font-semibold"><Calendar className="size-4" />Plan trip</Button>
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))}

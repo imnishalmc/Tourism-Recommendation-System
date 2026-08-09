@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 const navLinks = [
   { label: "Home", href: "#home", route: "/" },
   { label: "Destinations", href: "#destination", route: "/destination" },
-  { label: "Recommendations", href: "#recommendations", route: "/recommendations" },
   { label: "Itinerary", href: "#itinerary", route: "/itinerary" },
   { label: "About", href: "#about" },
 ];

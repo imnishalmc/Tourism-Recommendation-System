@@ -11,7 +11,7 @@ const chips: { label: string; category: string }[] = [
   { label: 'Culture', category: 'cultural_religious' },
   { label: 'Trekking', category: 'trekking_adventure' },
   { label: 'Wildlife', category: 'wildlife_conservation' },
-  { label: 'Religious', category: 'cultural_religious' },
+
   { label: 'Villages', category: 'village_rural' },
   { label: 'Wellness', category: 'wellness_relaxation' },
 ]

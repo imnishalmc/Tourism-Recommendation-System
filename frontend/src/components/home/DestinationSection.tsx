@@ -51,10 +51,9 @@ export function DestinationsSection() {
     async function loadDestinations() {
       try {
         const data = await getDestinations({
-          is_featured: "true",
+      
           ordering: "-popularity",
         });
-
         setDestinations(
           Array.isArray(data.results) ? data.results.slice(0, 6) : []
         );
@@ -87,7 +86,7 @@ export function DestinationsSection() {
             </h2>
           </div>
 
-          <Link to="destination">
+          <Link to="/destination">
             <Button
               variant="ghost"
               className="rounded-full font-semibold text-primary"

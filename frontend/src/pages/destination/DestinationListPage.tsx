@@ -85,26 +85,33 @@ export function DestinationListPage() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-5 sm:py-16 md:px-8">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            Explore Destinations
+          </h1>
 
-      <div className="m-2">
-        <div className="px-2 text-center">
-
-          <Link to="/">
-            <Button variant="outline" className="mt-6 rounded-full shimmer-color-gray-400">
-              <ArrowLeft className="size-4" />
-              Back to Home
-            </Button>
-          </Link>
+          {search && (
+            <p className="mt-2 text-muted-foreground">
+              Showing results for{" "}
+              <span className="font-semibold text-foreground">
+                "{search}"
+              </span>
+            </p>
+          )}
         </div>
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-          Explore Destinations
-        </h1>
-        {search && (
-          <p className="mt-2 text-muted-foreground">
-            Showing results for <span className="font-semibold text-foreground">"{search}"</span>
-          </p>
-        )}
+
+        <Link to="/">
+          <Button
+            variant="outline"
+            className="rounded-full shimmer-color-gray-400"
+          >
+            <ArrowLeft className="size-4" />
+            Back to Home
+          </Button>
+        </Link>
       </div>
+
 
       <div className="mb-8 flex flex-wrap items-center gap-3">
         <select

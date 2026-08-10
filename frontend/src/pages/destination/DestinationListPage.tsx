@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { Star, ArrowRight, Calendar, X } from 'lucide-react'
+import { Star, ArrowRight, Calendar, X, Search } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { getDestinations } from '@/services/destinationService'
@@ -46,6 +46,16 @@ export function DestinationListPage() {
   const crowd = searchParams.get('crowd_level') || ''
   const budget = searchParams.get('budget_level') || ''
 
+  // Local input state so typing doesn't trigger a fetch on every keystroke —
+  // only commits to the URL (and therefore triggers a search) on submit.
+  const [searchInput, setSearchInput] = useState(search)
+
+  // Keep the input in sync if the URL's search param changes from elsewhere
+  // (e.g. navigating here fresh from the hero section, or "Clear filters").
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
   useEffect(() => {
     let cancelled = false
     async function load() {
@@ -77,7 +87,18 @@ export function DestinationListPage() {
     setSearchParams(next)
   }
 
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    updateFilter('search', searchInput.trim())
+  }
+
+  function clearSearch() {
+    setSearchInput('')
+    updateFilter('search', '')
+  }
+
   function clearAll() {
+    setSearchInput('')
     setSearchParams({})
   }
 
@@ -112,6 +133,33 @@ export function DestinationListPage() {
         </Link>
       </div>
 
+      {/* Search */}
+      <form
+        onSubmit={handleSearchSubmit}
+        className="mb-6 flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/30 sm:max-w-lg"
+      >
+        <Search className="size-4 shrink-0 text-muted-foreground" />
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Search destinations, districts or activities..."
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        />
+        {searchInput && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+            aria-label="Clear search"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+        <Button type="submit" size="sm" className="shrink-0 rounded-full">
+          Search
+        </Button>
+      </form>
 
       <div className="mb-8 flex flex-wrap items-center gap-3">
         <select

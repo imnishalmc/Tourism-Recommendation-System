@@ -37,7 +37,7 @@ def get_search_service():
 class ReadOnlyOrAdminMixin:
     def get_permissions(self):
 
-        if self.action in ["list", "retrieve"]:
+        if self.action in ["list", "retrieve","record_view"]:
             return [AllowAny()]
 
         return [IsAdminRole()]

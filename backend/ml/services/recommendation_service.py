@@ -46,6 +46,10 @@ class RecommendationService:
         for destination in destinations:
             data.append(
                 {
+                    # Keep the database ID so the frontend can
+                    # navigate to the destination detail page.
+                    "id": destination.id,
+
                     "destination": destination.name,
                     "district": destination.district,
                     "province": destination.province,
@@ -59,9 +63,22 @@ class RecommendationService:
                     "accessibility": destination.accessibility,
                     "transportation": destination.transportation,
                     "difficulty_level": destination.difficulty_level,
+                    "crowd_level": destination.crowd_level,
+                    "budget_level": destination.budget_level,
+                    "visit_duration_days": destination.visit_duration_days,
+
+                    # Keep image information available for the
+                    # recommendation response.
+                    "image_url": destination.image_url,
+
+                    "latitude": destination.latitude,
+                    "longitude": destination.longitude,
+
                     "ratings": destination.ratings,
                     "popularity": destination.popularity,
-                    "attraction_total_reviews": destination.attraction_total_reviews,
+                    "attraction_total_reviews": (
+                        destination.attraction_total_reviews
+                    ),
                 }
             )
 

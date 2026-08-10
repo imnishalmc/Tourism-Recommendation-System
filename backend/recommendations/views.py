@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 from destinations.models import Destination
 
@@ -8,7 +8,7 @@ from .services import get_recommendations
 
 
 class RecommendationAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         destination_id = request.data.get("destination_id")

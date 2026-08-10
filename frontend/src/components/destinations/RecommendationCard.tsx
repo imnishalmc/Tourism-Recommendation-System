@@ -37,7 +37,16 @@ export function RecommendationCard({ item }: { item: RecommendedDestination }) {
         <p className="mt-1 text-sm text-muted-foreground">{item.district}, {item.province}</p>
         <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{item.description || "A destination matched to your interests."}</p>
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {item.id && <Link to={`/destination/${item.id}`}><Button variant="outline" className="w-full rounded-full">Details</Button></Link>}
+         {item.id && (
+  <Link to={`/destination/${item.id}`}>
+    <Button
+      variant="outline"
+      className="w-full rounded-full"
+    >
+      Details
+    </Button>
+  </Link>
+)}
           <Link to={`/itinerary?destination=${encodeURIComponent(item.destination)}`} className={item.id ? "" : "col-span-2"}><Button className="w-full rounded-full"><Calendar className="size-4" />Plan trip</Button></Link>
         </div>
       </div>

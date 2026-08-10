@@ -11,7 +11,6 @@ const chips: { label: string; category: string }[] = [
   { label: 'Culture', category: 'cultural_religious' },
   { label: 'Trekking', category: 'trekking_adventure' },
   { label: 'Wildlife', category: 'wildlife_conservation' },
-
   { label: 'Villages', category: 'village_rural' },
   { label: 'Wellness', category: 'wellness_relaxation' },
 ]
@@ -23,7 +22,9 @@ export function HeroSection() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     const trimmed = query.trim()
-    navigate(trimmed ? `/destination?search=${encodeURIComponent(trimmed)}` : '/explore')
+    // FIXED: was navigating to '/explore', which doesn't exist in this app.
+    // Now consistently targets '/destination', matching every other nav call below.
+    navigate(trimmed ? `/destination?search=${encodeURIComponent(trimmed)}` : '/destination')
   }
 
   function handleChipClick(category: string) {

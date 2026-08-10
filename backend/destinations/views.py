@@ -12,7 +12,7 @@ from rest_framework.exceptions import PermissionDenied
 from accounts.permissions import IsAdminRole
 
 from ml.services.search_service import SearchService
-
+import threading
 from .models import Destination, DestinationView, Review, RouteStage, TrekRoute
 from .serializers import (
     DestinationSerializer,
@@ -22,22 +22,23 @@ from .serializers import (
 )
 
 User = get_user_model()
-# Do not construct this at module import time. Django imports URL views before
-# migration commands run, and the search service queries the destination table.
 _search_service = None
+_search_service_lock = threading.Lock()
 
 
 def get_search_service():
     global _search_service
     if _search_service is None:
-        _search_service = SearchService()
+        with _search_service_lock:
+            if _search_service is None:
+                _search_service = SearchService()
     return _search_service
 
 
 class ReadOnlyOrAdminMixin:
     def get_permissions(self):
 
-        if self.action in ["list", "retrieve","record_view"]:
+        if self.action in ["list", "retrieve", "record_view"]:
             return [AllowAny()]
 
         return [IsAdminRole()]
@@ -101,6 +102,7 @@ class DestinationViewSet(
 
         search = self.request.query_params.get("search")
         main_category = self.request.query_params.get("main_category")
+        province = self.request.query_params.get("province")
         district = self.request.query_params.get("district")
         difficulty_level = self.request.query_params.get("difficulty_level")
         budget_level = self.request.query_params.get("budget_level")
@@ -111,6 +113,7 @@ class DestinationViewSet(
         if not search and not any(
             [
                 main_category,
+                province,
                 district,
                 difficulty_level,
                 crowd_level,
@@ -125,6 +128,7 @@ class DestinationViewSet(
             results = search_service.search(
                 query=search,
                 category=main_category,
+                province=province,
                 district=district,
                 difficulty=difficulty_level,
                 budget=budget_level,
@@ -139,6 +143,12 @@ class DestinationViewSet(
                 results = search_service.search_filter.filter_by_category(
                     results,
                     main_category,
+                )
+
+            if province:
+                results = search_service.search_filter.filter_by_province(
+                    results,
+                    province,
                 )
 
             if district:

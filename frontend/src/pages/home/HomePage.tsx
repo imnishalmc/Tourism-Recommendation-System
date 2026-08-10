@@ -1,12 +1,11 @@
 import PublicLayout from "../../layouts/PublicLayout";
 
-
 import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { DestinationsSection } from "@/components/home/DestinationSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { RecommendationsSection } from "@/components/home/RecommendationSection";
 import { ItinerarySection } from "@/components/home/ItenerarySection";
-import { TestimonialsSection } from "@/components/home/TestimonialsSections";
+import { ProvinceExplorer } from "@/components/home/ProvinceExplorer";
 import { StatsSection } from "@/components/home/StatsSection";
 import { HeroSection } from "@/components/home/HeroSection";
 
@@ -19,7 +18,7 @@ const HomePage = () => {
       <HowItWorksSection />
       <RecommendationsSection />
       <ItinerarySection />
-      <TestimonialsSection />
+      <ProvinceExplorer />
       <StatsSection />
     </PublicLayout>
   );

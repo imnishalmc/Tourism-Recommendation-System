@@ -11,13 +11,45 @@ from destinations.lookups import (
 
 CSV_PATH = "data/Sajilo_Yatraa_dataset.csv"
 
+# The CSV stores Nepal's provinces as their official numeric codes rather
+# than names. Map them here so imports always produce human-readable
+# province names, matching what filtering/search and the frontend expect.
+PROVINCE_CODE_TO_NAME = {
+    "1": "Koshi",
+    "2": "Madhesh",
+    "3": "Bagmati",
+    "4": "Gandaki",
+    "5": "Lumbini",
+    "6": "Karnali",
+    "7": "Sudurpashchim",
+}
+
+
+def normalize_province(raw_province):
+    """
+    Converts the CSV's numeric province code (e.g. "1", "1.0") into its
+    official name (e.g. "Koshi"). If the value is already a name, or is an
+    unrecognized code, it's kept as-is rather than dropped, so nothing is
+    silently lost on unexpected input.
+    """
+
+    if pd.isna(raw_province):
+        return ""
+
+    # Handles "1" and "1.0" (pandas sometimes reads a numeric column as float)
+    code = str(raw_province).strip()
+    if code.endswith(".0"):
+        code = code[:-2]
+
+    return PROVINCE_CODE_TO_NAME.get(code, code)
+
 
 def clean_coordinate(value):
     """
     Convert coordinates like:
         27.7107° N
         83.9852° E
-        
+
 
     into float values:
         27.7107
@@ -48,11 +80,7 @@ def split_tags(raw_tags):
 
     normalized = str(raw_tags).replace(";", ",")
 
-    return [
-        tag.strip()
-        for tag in normalized.split(",")
-        if tag.strip()
-    ]
+    return [tag.strip() for tag in normalized.split(",") if tag.strip()]
 
 
 class Command(BaseCommand):
@@ -69,9 +97,7 @@ class Command(BaseCommand):
         skipped_rows = []
 
         for _, row in df.iterrows():
-
             try:
-
                 # Normalize Category
 
                 raw_category = str(row["main_category"]).strip()
@@ -82,55 +108,40 @@ class Command(BaseCommand):
 
                 raw_difficulty = str(row["difficulty_level"]).strip()
 
-                difficulty_key = DIFFICULTY_NORMALIZATION[
-                    raw_difficulty
-                ]
+                difficulty_key = DIFFICULTY_NORMALIZATION[raw_difficulty]
 
                 # Estimate Budget & Duration
 
-                budget_level, duration_days = (
-                    BUDGET_DURATION_LOOKUP[
-                        (category_key, difficulty_key)
-                    ]
-                )
+                budget_level, duration_days = BUDGET_DURATION_LOOKUP[
+                    (category_key, difficulty_key)
+                ]
 
                 # Create or Update Destination
 
-                destination, created = (
-                    Destination.objects.update_or_create(
-                        name=str(row["destination"]).strip().title(),
-                        defaults={
-                            "district": row["district"],
-                            "province": str(row["province"]),
-                            "best_season": row["best_season"],
-                            "main_category": category_key,
-                            "tags": split_tags(row["tags"]),
-                            "activities": row["activities"],
-                            "difficulty_level": difficulty_key,
-                            "accessibility": row["accessibility"],
-                            "transportation": row["transportation"],
-                            "crowd_level": (
-                                str(row["crowd_level"])
-                                .strip()
-                                .lower()
-                                .replace(" ", "_")
-                            ),
-                            "budget_level": budget_level,
-                            "visit_duration_days": duration_days,
-                            "latitude": clean_coordinate(
-                                row["latitude"]
-                            ),
-                            "longitude": clean_coordinate(
-                                row["longitude"]
-                            ),
-                            "description": row["description"],
-                            "ratings": row["ratings"],
-                            "popularity": row["popularity"],
-                            "attraction_total_reviews": row[
-                                "attraction_total_reviews"
-                            ],
-                        },
-                    )
+                destination, created = Destination.objects.update_or_create(
+                    name=str(row["destination"]).strip().title(),
+                    defaults={
+                        "district": row["district"],
+                        "province": normalize_province(row["province"]),
+                        "best_season": row["best_season"],
+                        "main_category": category_key,
+                        "tags": split_tags(row["tags"]),
+                        "activities": row["activities"],
+                        "difficulty_level": difficulty_key,
+                        "accessibility": row["accessibility"],
+                        "transportation": row["transportation"],
+                        "crowd_level": (
+                            str(row["crowd_level"]).strip().lower().replace(" ", "_")
+                        ),
+                        "budget_level": budget_level,
+                        "visit_duration_days": duration_days,
+                        "latitude": clean_coordinate(row["latitude"]),
+                        "longitude": clean_coordinate(row["longitude"]),
+                        "description": row["description"],
+                        "ratings": row["ratings"],
+                        "popularity": row["popularity"],
+                        "attraction_total_reviews": row["attraction_total_reviews"],
+                    },
                 )
 
                 if created:
@@ -139,7 +150,6 @@ class Command(BaseCommand):
                     updated_count += 1
 
             except KeyError as e:
-
                 skipped_rows.append(
                     (
                         row.get("destination", "Unknown"),
@@ -148,7 +158,6 @@ class Command(BaseCommand):
                 )
 
             except Exception as e:
-
                 skipped_rows.append(
                     (
                         row.get("destination", "Unknown"),
@@ -157,26 +166,16 @@ class Command(BaseCommand):
                 )
 
         # Summary
-     
 
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS("=" * 50))
-        self.stdout.write(
-            self.style.SUCCESS(f"Created : {created_count}")
-        )
-        self.stdout.write(
-            self.style.SUCCESS(f"Updated : {updated_count}")
-        )
-        self.stdout.write(
-            self.style.WARNING(f"Skipped : {len(skipped_rows)}")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Created : {created_count}"))
+        self.stdout.write(self.style.SUCCESS(f"Updated : {updated_count}"))
+        self.stdout.write(self.style.WARNING(f"Skipped : {len(skipped_rows)}"))
         self.stdout.write(self.style.SUCCESS("=" * 50))
 
         if skipped_rows:
-
             self.stdout.write("\nSkipped Rows:\n")
 
             for destination, reason in skipped_rows:
-                self.stdout.write(
-                    f"• {destination} --> {reason}"
-                )
+                self.stdout.write(f"• {destination} --> {reason}")

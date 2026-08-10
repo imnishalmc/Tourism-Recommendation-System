@@ -12,6 +12,7 @@ import {
   DIFFICULTY_LEVELS,
   CROWD_LEVELS,
   BUDGET_LEVELS,
+  PROVINCES,
 } from '@/constants/categories'
 import { buildImageUrl, buildImageUrlCandidates } from '@/lib/destinationImages'
 
@@ -42,6 +43,7 @@ export function DestinationListPage() {
 
   const search = searchParams.get('search') || ''
   const mainCategory = searchParams.get('main_category') || ''
+  const province = searchParams.get('province') || ''
   const difficulty = searchParams.get('difficulty_level') || ''
   const crowd = searchParams.get('crowd_level') || ''
   const budget = searchParams.get('budget_level') || ''
@@ -65,6 +67,7 @@ export function DestinationListPage() {
         const data = await getDestinations({
           search: search || undefined,
           main_category: mainCategory || undefined,
+          province: province || undefined,
           difficulty_level: difficulty || undefined,
           crowd_level: crowd || undefined,
           budget_level: budget || undefined,
@@ -78,7 +81,7 @@ export function DestinationListPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [search, mainCategory, difficulty, crowd, budget])
+  }, [search, mainCategory, province, difficulty, crowd, budget])
 
   function updateFilter(key: string, value: string) {
     const next = new URLSearchParams(searchParams)
@@ -102,7 +105,8 @@ export function DestinationListPage() {
     setSearchParams({})
   }
 
-  const hasActiveFilters = search || mainCategory || difficulty || crowd || budget
+  const hasActiveFilters = search || mainCategory || province || difficulty || crowd || budget
+  const provinceLabel = PROVINCES.find((p) => p.value === province)?.label ?? province
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-5 sm:py-16 md:px-8">
@@ -117,6 +121,15 @@ export function DestinationListPage() {
               Showing results for{" "}
               <span className="font-semibold text-foreground">
                 "{search}"
+              </span>
+            </p>
+          )}
+
+          {!search && province && (
+            <p className="mt-2 text-muted-foreground">
+              Showing results for{" "}
+              <span className="font-semibold text-foreground">
+                {provinceLabel} province
               </span>
             </p>
           )}
@@ -162,6 +175,17 @@ export function DestinationListPage() {
       </form>
 
       <div className="mb-8 flex flex-wrap items-center gap-3">
+        {province && (
+          <button
+            type="button"
+            onClick={() => updateFilter('province', '')}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20"
+          >
+            {provinceLabel}
+            <X className="size-3.5" />
+          </button>
+        )}
+
         <select
           value={mainCategory}
           onChange={(e) => updateFilter('main_category', e.target.value)}

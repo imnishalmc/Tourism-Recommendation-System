@@ -76,6 +76,7 @@ class SearchService:
         self,
         query=None,
         category=None,
+        province=None,
         district=None,
         difficulty=None,
         budget=None,
@@ -94,6 +95,11 @@ class SearchService:
         results = self.search_filter.filter_by_category(
             results,
             category,
+        )
+
+        results = self.search_filter.filter_by_province(
+            results,
+            province,
         )
 
         if district:
@@ -147,7 +153,4 @@ class SearchService:
         if results.empty:
             return results
 
-        return self.search_ranking.rank(results)
-
-    def reload(self):
-        self.load_data()
+        return self.search_ranking.rank(results)  

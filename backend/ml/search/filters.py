@@ -18,3 +18,23 @@ class SearchFilter:
         ]
 
         return filtered_df.reset_index(drop=True)
+
+    def filter_by_province(
+        self,
+        dataframe,
+        province,
+    ):
+
+        if not province:
+            return dataframe
+
+        province = province.lower().strip()
+
+        filtered_df = dataframe[
+            dataframe["province"]
+            .astype(str)
+            .str.lower()
+            .eq(province)
+        ]
+
+        return filtered_df.reset_index(drop=True)

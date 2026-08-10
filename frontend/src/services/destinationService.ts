@@ -7,6 +7,7 @@ import type {
 export interface DestinationFilters {
   search?: string;
   main_category?: string;
+  province?: string;
   district?: string;
   difficulty_level?: string;
   crowd_level?: string;

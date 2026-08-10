@@ -15,8 +15,6 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-
-
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("access_token");
@@ -29,8 +27,6 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-
 
 let isRefreshing = false;
 
@@ -53,9 +49,6 @@ const processQueue = (
 
   failedQueue = [];
 };
-
-
-
 
 api.interceptors.response.use(
   (response) => response,

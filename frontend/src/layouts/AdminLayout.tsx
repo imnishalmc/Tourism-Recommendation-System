@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { BarChart3, LogOut, MapPinned, Menu, MessageSquareText, Mountain, Users } from "lucide-react";
+import { NavLink, Outlet, useNavigate,Link } from "react-router-dom";
+import { BarChart3, LogOut, MapPinned, Menu, MessageSquareText, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,14 @@ export default function AdminLayout() {
   const navClass = ({ isActive }: { isActive: boolean }) => cn("flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition", isActive ? "bg-primary text-white shadow-sm" : "text-slate-600 hover:bg-slate-100 hover:text-primary");
   return <div className="min-h-screen bg-slate-50 text-foreground">
     <aside className="fixed inset-y-0 z-20 hidden w-64 flex-col border-r border-slate-200 bg-white p-5 md:flex">
-      <button onClick={() => navigate("/")} className="flex items-center gap-3 text-left"><span className="flex size-10 items-center justify-center rounded-xl bg-primary text-white"><Mountain className="size-5" /></span><span><span className="block font-bold">Sajilo Yatra</span><span className="text-xs text-muted-foreground">Administration</span></span></button>
+       <Link to="/" className="flex items-center gap-2">
+  <img
+    src="/sajiloyatralogo.png"
+    alt="Sajilo Yatra logo"
+    className="size-37 object-contain"
+  />
+
+</Link>
       <nav className="mt-10 space-y-1">{links.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} className={navClass}><Icon className="size-4" />{label}</NavLink>)}</nav>
       <div className="mt-auto flex items-center gap-3 rounded-2xl bg-soft-green p-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-semibold text-primary">{initials(user?.full_name)}</span><div className="min-w-0"><p className="truncate text-sm font-semibold">{user?.full_name || "Administrator"}</p><p className="truncate text-xs text-muted-foreground">{user?.email}</p></div></div>
       <button onClick={() => { logout(); navigate("/"); }} className="mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-red-50 hover:text-red-600"><LogOut className="size-4" />Sign out</button>

@@ -1,19 +1,19 @@
 
 
-import {Link} from "react-router-dom";
-import {Mountain} from "lucide-react";
-const columns=[
-    {
-    title:"Home",
-    links:[{label:"Home",to:"/"}]
+import { Link } from "react-router-dom";
+import { Mountain } from "lucide-react";
+const columns = [
+  {
+    title: "Home",
+    links: [{ label: "Home", to: "/" }]
   },
   {
-    title:"Explore",
-    links:[{label:"Destinations",to:"/destination"}]
+    title: "Explore",
+    links: [{ label: "Destinations", to: "/destination" }]
   },
   {
-    title:"Itinerary",
-    links:[{label:"AI Matches",to:"/itinerary"}]
+    title: "Itinerary",
+    links: [{ label: "AI Matches", to: "/itinerary" }]
   }
 ]
 
@@ -23,19 +23,19 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-5 py-16 md:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <a href="#home" className="flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Mountain className="size-5" strokeWidth={2.2} />
-              </span>
-              <span className="text-lg font-bold tracking-tight">
-                Sajilo Yatra
-              </span>
-            </a>
-            <p className="mt-4 max-w-xs text-pretty leading-relaxed text-muted-foreground">
+            <Link to="/" className="flex items-center gap-2">
+              <img
+                src="/sajiloyatralogo.png"
+                alt="Sajilo Yatra logo"
+                className="size-37 object-contain"
+              />
+
+            </Link>
+            <p className="mt-[-29px] max-w-xs text-pretty leading-relaxed text-muted-foreground">
               AI-powered travel recommendations and smart itineraries to help
               you discover Nepal, smarter.
             </p>
-    
+
           </div>
 
           {columns.map((col) => (
@@ -44,7 +44,7 @@ export function SiteFooter() {
               <ul className="mt-4 space-y-3">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                     <Link
+                    <Link
                       to={link.to}
                       className="text-sm text-muted-foreground transition-colors hover:text-primary"
                     >

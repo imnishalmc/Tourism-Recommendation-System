@@ -61,20 +61,14 @@ export function SiteNavbar() {
       )}
     >
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Mountain className="size-6" />
-          </span>
+     <Link to="/" className="flex items-center gap-2">
+  <img
+    src="/sajiloyatralogo.png"
+    alt="Sajilo Yatra logo"
+    className="size-37 object-contain"
+  />
 
-          <span
-            className={cn(
-              "text-2xl font-bold",
-              scrolled ? "text-foreground" : "text-white"
-            )}
-          >
-            Sajilo Yatra
-          </span>
-        </Link>
+</Link>
 
         {/* Desktop Navigation */}
 

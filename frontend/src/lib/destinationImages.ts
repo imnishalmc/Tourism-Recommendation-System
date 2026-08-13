@@ -1,123 +1,14 @@
-// No global placeholder fallback — prefer no image over a generic hero.
+const IMAGE_DIRECTORY = "/images/destination_images";
 
-const DESTINATION_IMAGE_FILENAMES = [
-  "download.jpeg",
-  "download.jpg",
-  "download (1).jpeg",
-  "download (1).jpg",
-  "download (2).jpeg",
-  "download (2).jpg",
-  "download (3).jpeg",
-  "download (3).jpg",
-  "download (4).jpeg",
-  "download (4).jpg",
-  "download (5).jpeg",
-  "download (5).jpg",
-  "download (6).jpeg",
-  "download (6).jpg",
-  "download (7).jpeg",
-  "download (7).jpg",
-  "images.jpeg",
-  "images.jpg",
-  "image.jpeg",
-  "image.jpg",
-  "image (1).jpeg",
-  "image (1).jpg",
-  "photo.jpeg",
-  "photo.jpg",
-  "photo (1).jpeg",
-  "photo (1).jpg",
-  "cover.jpeg",
-  "cover.jpg",
-  "cover (1).jpeg",
-  "cover (1).jpg",
-  "thumb.jpeg",
-  "thumb.jpg",
-  "thumbnail.jpeg",
-  "thumbnail.jpg",
-];
-
-function encodePathSegment(text: string): string {
-  return encodeURIComponent(text);
-}
-
-function titleCaseDestinationName(name: string): string {
-  return name
-    .trim()
-    .replace(/\s+/g, " ")
-    .replace(/(^|[^A-Za-z])([a-z])/g, (_, prefix, char) =>
-      `${prefix}${char.toUpperCase()}`
-    );
-}
-
-function buildDestinationNameCandidates(destinationName: string): string[] {
-  const normalizedName = titleCaseDestinationName(destinationName);
-  const explicitCandidates = [
-    `${normalizedName}.jpeg`,
-    `${normalizedName}.jpg`,
-    `${normalizedName} 1.jpeg`,
-    `${normalizedName} 1.jpg`,
-    `${normalizedName} 1.1.jpeg`,
-    `${normalizedName} 1.1.jpg`,
-    `${normalizedName}1.1.jpeg`,
-    `${normalizedName}1.1.jpg`,
-  ];
-
-  const numberedCandidates = Array.from({ length: 10 }, (_, index) => {
-    const number = index + 1;
-    return [
-      `${normalizedName} ${number}.jpeg`,
-      `${normalizedName} ${number}.jpg`,
-      `${normalizedName}${number}.jpeg`,
-      `${normalizedName}${number}.jpg`,
-    ];
-  }).flat();
-
-  return [...new Set([...explicitCandidates, ...numberedCandidates])];
-}
-
-function buildFolderCandidates(folder: string): string[] {
-  const destinationName = folder
+function encodeImagePath(path: string): string {
+  return path
     .split("/")
-    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
     .join("/");
-  const destinationCandidates = buildDestinationNameCandidates(destinationName);
-  const titleCaseFolder = titleCaseDestinationName(destinationName);
-  const folderVariants = Array.from(new Set([folder, titleCaseFolder]));
-  const encodedFolderVariants = folderVariants.map((variant) =>
-    variant
-      .split("/")
-      .map((segment) => encodePathSegment(segment))
-      .join("/")
-  );
-  const candidateUrls = [
-    ...destinationCandidates.flatMap((candidate) => {
-      const encodedCandidate = encodePathSegment(candidate);
-      return folderVariants.flatMap((folderVariant, index) => [
-        `/images/destination_images/${folderVariant}/${candidate}`,
-        `/images/destination_images/${encodedFolderVariants[index]}/${encodedCandidate}`,
-      ]);
-    }),
-    ...DESTINATION_IMAGE_FILENAMES.flatMap((filename) => {
-      const encodedFilename = encodePathSegment(filename);
-      return folderVariants.flatMap((folderVariant, index) => [
-        `/images/destination_images/${folderVariant}/${filename}`,
-        `/images/destination_images/${encodedFolderVariants[index]}/${encodedFilename}`,
-      ]);
-    }),
-  ];
-
-  return Array.from(new Set(candidateUrls));
 }
 
-export function buildImageUrl(
-  imageUrl: string | string[] | null | undefined,
-  destinationName?: string
-): string {
-  return buildImageUrlCandidates(imageUrl, destinationName)[0] || "";
-}
-
-function normalizeImageUrlSources(
+function normaliseImageSources(
   imageUrl: string | string[] | null | undefined
 ): string[] {
   if (!imageUrl) {
@@ -125,100 +16,81 @@ function normalizeImageUrlSources(
   }
 
   if (Array.isArray(imageUrl)) {
-    return imageUrl.map((item) => String(item).trim()).filter(Boolean);
+    return imageUrl.map(String).map((value) => value.trim()).filter(Boolean);
   }
 
-  const rawValue = String(imageUrl).trim();
-  if (!rawValue) {
+  const value = String(imageUrl).trim();
+  if (!value) {
     return [];
   }
 
-  // A data URI contains a comma between its metadata and encoded bytes. It is
-  // one image source, not a comma-separated list of image sources.
-  if (/^(data:)?image\/[a-z0-9.+-]+;base64,/i.test(rawValue)) {
-    return [rawValue];
+  if (/^(data:)?image\/[a-z0-9.+-]+;base64,/i.test(value)) {
+    return [value];
   }
 
-  if (/^\[.*\]$/.test(rawValue)) {
+  if (/^\[.*\]$/.test(value)) {
     try {
-      const parsed = JSON.parse(rawValue);
+      const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) {
-        return parsed.map((item) => String(item).trim()).filter(Boolean);
+        return parsed.map(String).map((item) => item.trim()).filter(Boolean);
       }
     } catch {
-      // ignore invalid JSON and fall back to delimiter parsing
+      // Treat invalid JSON as a regular image path below.
     }
   }
 
-  return rawValue
-    .split(/[,;|\n]+/)
-    .map((item) => String(item).trim())
-    .filter(Boolean);
+  // Dataset fields use semicolons to separate image paths. The first path is
+  // normally enough, so it becomes the first and fastest image request.
+  return value.split(/[;|\n]+/).map((item) => item.trim()).filter(Boolean);
+}
+
+function toImageUrl(source: string): string {
+  const normalised = source.replace(/\\/g, "/").trim();
+
+  if (/^https?:\/\//i.test(normalised) || /^data:image\//i.test(normalised)) {
+    return normalised;
+  }
+
+  if (/^image\/[a-z0-9.+-]+;base64,/i.test(normalised)) {
+    return `data:${normalised}`;
+  }
+
+  const relativePath = normalised
+    .replace(/^\/+/, "")
+    .replace(/^images\/destination_images\//i, "");
+
+  return `${IMAGE_DIRECTORY}/${encodeImagePath(relativePath)}`;
+}
+
+function fallbackImageUrls(destinationName?: string): string[] {
+  const folder = destinationName?.trim();
+  if (!folder) {
+    return [];
+  }
+
+  // These are only used for older records whose image_url has not yet been
+  // backfilled. Keep the list short so a missing image cannot cause dozens of
+  // failed network requests.
+  return ["download.jpeg", "download (1).jpeg"]
+    .map((filename) => `${folder}/${filename}`)
+    .map(toImageUrl);
 }
 
 export function buildImageUrlCandidates(
   imageUrl: string | string[] | null | undefined,
   destinationName?: string
 ): string[] {
-  const sources = normalizeImageUrlSources(imageUrl);
+  const exactImageUrls = normaliseImageSources(imageUrl).map(toImageUrl);
 
-  const candidates: string[] = [];
+  return Array.from(new Set([
+    ...exactImageUrls,
+    ...fallbackImageUrls(destinationName),
+  ]));
+}
 
-  for (const source of sources) {
-    const normalizedSource = source.replace(/\\/g, "/").trim();
-    if (!normalizedSource) {
-      continue;
-    }
-
-    if (/^https?:\/\//i.test(normalizedSource)) {
-      candidates.push(normalizedSource);
-      const parts = normalizedSource
-        .split(/[/\\]+/)
-        .map((p) => encodeURIComponent(p.trim()));
-      const folder = parts.slice(0, -1).join("/");
-      candidates.push(...buildFolderCandidates(folder));
-      continue;
-    }
-
-    // Some imported records omit the `data:` part of a base64 image URI.
-    if (/^image\/[a-z0-9.+-]+;base64,/i.test(normalizedSource)) {
-      candidates.push(`data:${normalizedSource}`);
-      continue;
-    }
-
-    if (/^data:image\//i.test(normalizedSource)) {
-      candidates.push(normalizedSource);
-      continue;
-    }
-
-    if (normalizedSource.startsWith("/")) {
-      candidates.push(normalizedSource);
-      continue;
-    }
-
-    if (normalizedSource.includes("/")) {
-      const normalized = normalizedSource
-        .split(/[/\\]+/)
-        .map((p) => p.trim())
-        .join("/");
-      candidates.push(`/images/destination_images/${normalized}`);
-      const folder = normalized.split("/").slice(0, -1).join("/");
-      candidates.push(...buildFolderCandidates(folder));
-      continue;
-    }
-
-    candidates.push(`/images/destination_images/${normalizedSource}`);
-  }
-
-  const folder = destinationName
-    ?.trim()
-    .split(/[/\\]+/)
-    .map((p) => p.trim())
-    .join("/");
-
-  if (folder) {
-    candidates.push(...buildFolderCandidates(folder));
-  }
-
-  return Array.from(new Set(candidates.filter(Boolean)));
+export function buildImageUrl(
+  imageUrl: string | string[] | null | undefined,
+  destinationName?: string
+): string {
+  return buildImageUrlCandidates(imageUrl, destinationName)[0] || "";
 }

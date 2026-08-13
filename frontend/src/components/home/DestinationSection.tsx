@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/Button";
@@ -13,7 +13,7 @@ import {
   DIFFICULTY_LEVELS,
   CROWD_LEVELS,
 } from "@/constants/categories";
-import { buildImageUrl, buildImageUrlCandidates } from '@/lib/destinationImages';
+import { buildImageUrl, buildImageUrlCandidates } from "@/lib/destinationImages";
 
 const difficultyStyles: Record<string, string> = {
   easy: "bg-soft-green text-secondary",
@@ -38,22 +38,19 @@ function label(
 }
 
 export function DestinationsSection() {
-  const [destinations, setDestinations] = useState<
-    Destination[]
-  >([]);
-
+  const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
-  // Keep the render safe even if Vite preserves an older invalid state during
-  // hot reload, or an unexpected API response reaches this component.
+
   const destinationList = Array.isArray(destinations) ? destinations : [];
 
   useEffect(() => {
     async function loadDestinations() {
       try {
         const data = await getDestinations({
-      
+          is_featured: "true",
           ordering: "-popularity",
         });
+
         setDestinations(
           Array.isArray(data.results) ? data.results.slice(0, 6) : []
         );
@@ -73,9 +70,7 @@ export function DestinationsSection() {
       className="scroll-mt-16 bg-muted/40 py-20 md:py-28"
     >
       <div className="mx-auto max-w-7xl px-5 md:px-8">
-
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-wider text-primary">
               Popular Destinations
@@ -95,7 +90,6 @@ export function DestinationsSection() {
               <ArrowRight className="size-4" />
             </Button>
           </Link>
-
         </div>
 
         {loading ? (
@@ -108,21 +102,14 @@ export function DestinationsSection() {
           </p>
         ) : (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
             {destinationList.map((d) => (
-
               <article
                 key={d.id}
                 className="group overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition hover:-translate-y-1"
               >
-
                 <div className="relative aspect-[4/3] overflow-hidden">
-
                   <img
-                    src={buildImageUrl(
-                      d.image_url,
-                      d.name
-                    )}
+                    src={buildImageUrl(d.image_url, d.name)}
                     alt={d.name}
                     data-image-index="0"
                     onError={(e) => {
@@ -149,17 +136,13 @@ export function DestinationsSection() {
 
                   {d.ratings && (
                     <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-background px-3 py-1">
-
                       <Star className="size-3 fill-yellow-400 text-yellow-400" />
-
                       {d.ratings.toFixed(1)}
-
                     </span>
                   )}
                 </div>
 
                 <div className="p-6">
-
                   <h3 className="text-lg font-semibold">
                     {d.name}
                   </h3>
@@ -168,20 +151,14 @@ export function DestinationsSection() {
                     {d.district}
                   </p>
 
-                  <div className="mt-4 flex gap-2">
-
+                  <div className="mt-4 flex flex-wrap gap-2">
                     <span
                       className={cn(
                         "rounded-full px-3 py-1 text-xs",
-                        difficultyStyles[
-                        d.difficulty_level
-                        ]
+                        difficultyStyles[d.difficulty_level]
                       )}
                     >
-                      {label(
-                        DIFFICULTY_LEVELS,
-                        d.difficulty_level
-                      )}
+                      {label(DIFFICULTY_LEVELS, d.difficulty_level)}
                     </span>
 
                     <span
@@ -190,39 +167,39 @@ export function DestinationsSection() {
                         crowdStyles[d.crowd_level]
                       )}
                     >
-                      {label(
-                        CROWD_LEVELS,
-                        d.crowd_level
-                      )}
+                      {label(CROWD_LEVELS, d.crowd_level)}
                     </span>
-
                   </div>
 
                   <p className="mt-4 line-clamp-3 text-sm text-muted-foreground">
                     {d.description}
                   </p>
 
-                  <Link
-                    to={`/destination/${d.id}`}
-                  >
-                    <Button
-                      variant="outline"
-                      className="mt-5 w-full rounded-full"
+                  <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <Link to={`/destination/${d.id}`}>
+                      <Button
+                        variant="outline"
+                        className="w-full rounded-full font-semibold"
+                      >
+                        View Details
+                        <ArrowRight className="size-4" />
+                      </Button>
+                    </Link>
+
+                    <Link
+                      to={`/itinerary?destination=${encodeURIComponent(d.name)}`}
                     >
-                      View Details
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </Link>
-
+                      <Button className="w-full rounded-full font-semibold">
+                        <Calendar className="size-4" />
+                        Plan trip
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-
               </article>
-
             ))}
-
           </div>
         )}
-
       </div>
     </section>
   );

@@ -14,7 +14,7 @@ const api: AxiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
+//this interceptor helps to add the access token to each request
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("access_token");
@@ -49,7 +49,7 @@ const processQueue = (
 
   failedQueue = [];
 };
-
+//response interceptor to handle 401 errors and refresh the access token if needed
 api.interceptors.response.use(
   (response) => response,
 

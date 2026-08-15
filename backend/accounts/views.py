@@ -44,7 +44,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = authenticate(
+        user = authenticate(#verify credentials 
             request,
             username=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
@@ -55,7 +55,7 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        refresh = RefreshToken.for_user(user)
+        refresh = RefreshToken.for_user(user)#this generates the tokens
         return Response(
             {
                 "access": str(refresh.access_token),

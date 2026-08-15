@@ -38,3 +38,7 @@ class SearchFilter:
         ]
 
         return filtered_df.reset_index(drop=True)
+    # this is the file that is responsible for filtering the dataframe based on category and province.
+    #  Each method takes a dataframe and a category or province as input, and returns a filtered dataframe that only contains rows that match the specified category or province.
+    #  If no category or province is provided, the original dataframe is returned.  
+     

@@ -16,7 +16,7 @@ interface Props {
   children: ReactNode;
 }
 
-export function AuthProvider({ children }: Props) {
+export function AuthProvider({ children }: Props) {//provider mounts, initial phase 
   const [user, setUser] = useState<User | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: Props) {
     initializeAuth();
   }, []);
 
-  async function initializeAuth() {
+  async function initializeAuth() {//step 1 
     const token = localStorage.getItem("access_token");
 
     if (!token) {
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: Props) {
     }
   }
 
-  async function refreshProfile() {
+  async function refreshProfile() {//if access token exits
     try {
       const response = await api.get<User>("/accounts/profile/");
 
